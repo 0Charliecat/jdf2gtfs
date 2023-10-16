@@ -11,7 +11,7 @@ A Dependency used by IsItHere to create GTFS feeds from JDF packaged timetables.
 ## Usage
 
 ```javascript
-const JDF2GTFS = require("./index")
+const JDF2GTFS = require("jdf2gtfs")
 
 const runner = new JDF2GTFS({
     path: "/Users/0charliecat/Github/jdf2gtfs/.temp/tdtn11122022",

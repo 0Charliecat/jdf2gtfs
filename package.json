@@ -7,7 +7,7 @@
   },
   "name": "jdf2gtfs",
   "description": "a nodejs script and dependency to convert Czechoslovak JDF timetable format to GTFS",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "directories": {
     "lib": "lib"
