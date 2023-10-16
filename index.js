@@ -55,6 +55,12 @@ class JDF2GTFS {
         this.stop_times_headsigns = Object.assign({}, e.stop_times_headsigns)
         this.years = Array.from(new Set([now.getUTCFullYear()].concat(e.years)))
         this.line_route_type_override = Object.assign({}, e.line_route_type_override)
+        this.feed_publisher_name = e.feed_publisher_name
+        this.feed_publisher_url = e.feed_publisher_url
+        this.start_date = e.start_date
+        this.end_date = e.end_date
+        this.feed_contact_email = e.feed_contact_email || ""
+        this.feed_contact_url = e.feed_contact_url || ""
     }
 
     async make() {
