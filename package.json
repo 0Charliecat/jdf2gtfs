@@ -3,7 +3,8 @@
     "csvtojson": "^2.0.10",
     "iconv-lite": "^0.6.3",
     "json-2-csv": "^4.1.0",
-    "slovak-holidays": "^1.0.1"
+    "slovak-holidays": "^1.0.1",
+    "typescript": "^5.5.4"
   },
   "name": "jdf2gtfs",
   "description": "a nodejs script and dependency to convert Czechoslovak JDF timetable format to GTFS",
@@ -12,7 +13,6 @@
   "directories": {
     "lib": "lib"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -29,5 +29,8 @@
   "bugs": {
     "url": "https://github.com/0Charliecat/jdf2gtfs/issues"
   },
-  "homepage": "https://github.com/0Charliecat/jdf2gtfs#readme"
+  "homepage": "https://github.com/0Charliecat/jdf2gtfs#readme",
+  "devDependencies": {
+    "@types/node": "^22.1.0"
+  }
 }
