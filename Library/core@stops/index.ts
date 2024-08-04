@@ -1,6 +1,3 @@
-import iconv from 'iconv-lite'
-import csv from 'csvtojson'
-import fs from 'fs'
 import path from 'path'
 import { Stop, StopLocationType } from '../@isithere/gtfs_types/Stop'
 import { JDF2GTFS } from '../..'
