@@ -4,10 +4,10 @@ import { getContentsArray } from "../_app/_reusables/getContentsArray";
 import { Agency } from "../@isithere/gtfs_types/Agency";
 
 // Defined JDF Headers from Docs
-const JDFHeaders = [ "id", "DIC", "name", "_02", "_03", "address", "mainPhoneNumber", "traficPhoneNumber", "infoPhoneNumber", "fax", "email", "web", "ext" ] // TODO: docs show a diff than the files used in testing
+const JDFHeaders = [ "id", "DIC", "name", "agencyCorporationType", "naturalPersonName", "address", "mainPhoneNumber", "traficPhoneNumber", "infoPhoneNumber", "fax", "email", "web", "ext" ] // TODO: docs show a diff than the files used in testing
 
 export default async function runtime(config: JDF2GTFS) {
-	const { id_prefix, feed_info, timezone, lang } = config
+	const { id_prefix, timezone, lang } = config
 	const _Dopravci: JDFDopravciObject[] = await getContentsArray(
 		path.join(config.path, 'dopravci.txt'),
 		JDFHeaders
@@ -32,12 +32,17 @@ export default async function runtime(config: JDF2GTFS) {
 	return Entities
 }
 
+enum JDFDopravcaTyp {
+	Enterprice = "1",		// právnická osoba
+	NaturalPerson = "2"		// fyzická osoba
+}
+
 interface JDFDopravciObject {
 	id: string,
 	DIC: string,
 	name: string,
-	_02?: any,
-	_03?: any,
+	agencyCorporationType: JDFDopravcaTyp;
+	naturalPersonName?: string,
 	address: string;
 	mainPhoneNumber: string;
 	traficPhoneNumber?: string;
@@ -45,5 +50,5 @@ interface JDFDopravciObject {
 	fax?: string;
 	email?: string;
 	web?: string;
-	ext?: string;
+	ext: string;
 }
