@@ -1,30 +1,35 @@
 import path from "path";
 import { JDF2GTFS } from "../.."
 import { getContentsArray } from "../_app/_reusables/getContentsArray";
-import { Route, RouteVehicleType } from '../@isithere/gtfs_types/Route'
+import { Route, RouteVehicleType } from '@isithere/gtfs'
 import { BooleanyValue } from "../_app/_types/BooleanyValue";
-
-// Defined JDF Headers from Docs
-const JDFHeaders = [ "lineNumber", "lineName", "agencyID", "routingType", "vehicleType", "inDisrupted", "isRoutingGroup", "usingOfPlatforms", "isOneWayTimetable", "_01", "licenseNumber", "licenseValidFrom", "licenseValidUntil", "timetableValidFrom", "timetableValidUntil", ] 
+import { DopravnyProstriedok, Linky, headers } from "../@isithere/jdf_types/Linky";
+import { LinExt, headers as linextHeaders } from "../@isithere/jdf_types/LinExt";
+import { getAgencyID } from "../core@agencies";
 
 export default async function runtime(config: JDF2GTFS) {
 	const { id_prefix, lineColors } = config
-	const _Linky: JDFLinkyObject[] = await getContentsArray(
-		path.join(config.path, 'linky.txt'),
-		JDFHeaders
+	const _Linky: Linky[] = await getContentsArray(
+		config.getFile("linky")!,
+		headers
 	)
+	const _LinExt: LinExt[] = config.getFile("linext") 
+		? await getContentsArray(config.getFile("linext")!, linextHeaders)
+		: []
 
 	let Entities: Map<string, Route> = new Map()
 
 	for (let _ of _Linky) {
+		let _ext = _LinExt.find(ext => ext.lineNumber === _.number)
+		console.log(_)
 		let computedRoute = new Route({
-			id: id_prefix+_.lineNumber,
-			agency: id_prefix+_.agencyID,
-			shortName: _.lineNumber,
-			longName: _.lineName,
+			id: `${id_prefix}${_.number}r${_.lineResolution}`,
+			agency: getAgencyID(id_prefix, _.agencyID, _.agencyResolution),
+			shortName: _ext?.preference ? _ext!.routeShortName : _.number,
+			longName: _.name,
 			type: _GetGTFSRouteType(_.vehicleType),
-			backgroundColor: lineColors.get(_.lineNumber)?.background ?? "ffffff",
-			foregroundColor: lineColors.get(_.lineNumber)?.background ?? "000000"
+			// backgroundColor: lineColors.get(_.number)?.background ?? "ffffff",
+			// foregroundColor: lineColors.get(_.number)?.background ?? "000000"
 		})
 
 		Entities.set(computedRoute.id, computedRoute)
@@ -34,62 +39,22 @@ export default async function runtime(config: JDF2GTFS) {
 
 }
 
-function _GetGTFSRouteType(type: JDFVehicleType) {
+function _GetGTFSRouteType(type: DopravnyProstriedok) {
 	switch (type) {
-		case JDFVehicleType.Bus:
+		case DopravnyProstriedok.Bus:
 			return RouteVehicleType.Bus
-		case JDFVehicleType.Ferry:
+		case DopravnyProstriedok.Ferry:
 			return RouteVehicleType.Ferry
-		case JDFVehicleType.Funicular:
+		case DopravnyProstriedok.CableCar:
 			return RouteVehicleType.Funicular
-		case JDFVehicleType.Tram:
+		case DopravnyProstriedok.Tram:
 			return RouteVehicleType.Streetcar
-		case JDFVehicleType.Trolleybus:
+		case DopravnyProstriedok.Trolleybus:
 			return RouteVehicleType.Trolleybus
-		case JDFVehicleType.Underground:
+		case DopravnyProstriedok.Metro:
 			return RouteVehicleType.Metro
 		
 		default:
 			return null
 	}
 }
-
-enum JDFVehicleType {
-	Bus = "A",
-	Tram = "E",
-	Funicular = "L",
-	Underground = "M",
-	Ferry = "P",
-	Trolleybus = "T"
-}
-
-enum JDFRoutingType {
-	City = "A",								// Městská
-	'City+Suburban' = 'B',					// Městská s obsluhou příměstských oblastí
-	InternationalNoInnerTransport = "N",	// Mezinárodní – s vyloučenou vnitrostátní dopravou
-	InternationalInnerTransport = "P",		// Mezinárodní – s povolenou vnitrostátní dopravou
-	Region = "V",							// Vnitrostátní – vnitrokrajská
-	InterRegion = "Z",						// Vnitrostátní – mezikrajská
-	LongDistance = "D"						// Vnitrostátní – dálková
-}
-
-interface JDFLinkyObject {
-	lineNumber: string;
-	lineName: string;
-	agencyID: string;
-	routingType: JDFRoutingType;
-	vehicleType: JDFVehicleType;
-	isDisrupted: BooleanyValue;
-	isRoutingGroup: BooleanyValue;
-	usingOfPlatforms: BooleanyValue;
-	isOneWayTimetable: BooleanyValue;
-	_01: any;
-	licenseNumber?: string;
-	licenseValidFrom?: string;		// Date in DDMMYYYY
-	licenseValidUntil?: string;		// Date in DDMMYYYY
-	timetableValidFrom: string;		// Date in DDMMYYYY
-	timetableValidUntil: string;	// Date in DDMMYYYY
-	extAgency: string;
-	extLine: string;
-}
-

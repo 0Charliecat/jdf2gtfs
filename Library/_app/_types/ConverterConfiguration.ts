@@ -1,5 +1,5 @@
-import { GTFSFeedInfoObject } from "../../@isithere/gtfs_types/FeedInfo";
-import { RouteVehicleType } from "../../@isithere/gtfs_types/Route";
+import { GTFSFeedInfoObject } from "@isithere/gtfs";
+import { RouteVehicleType } from "@isithere/gtfs";
 import { LongitudeLatitude, Timezone, LanguageCode, HexCodeColor, Year } from "./Simples";
 
 export interface Configuration {

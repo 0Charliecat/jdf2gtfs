@@ -1,41 +1,45 @@
-import { GTFSFeedInfoObject } from "./Library/@isithere/gtfs_types/FeedInfo"
-import { RouteVehicleType } from "./Library/@isithere/gtfs_types/Route"
+import { FeedInfo, GTFSFeedInfoObject, RouteVehicleType, Stop } from "@isithere/gtfs"
 import { HexCodeColor, LanguageCode, LongitudeLatitude, Timezone, Year } from "./Library/_app/_types/Simples"
-import { Stop } from "./Library/@isithere/gtfs_types/Stop"
+import { JDFFileName, JDFFileProvider } from "./Library/lib@FileProvider/_types/FileProviderTypes";
+import FileProvider from "./Library/lib@FileProvider/FileProvider";
 
-const Stops = require("./lib/stops")
-const Agencies = require("./lib/agencies")
-const Routes = require("./lib/routes")
-const Trips = require("./lib/trips")
-const StopTimes = require("./lib/stop_times")
-const Calendar = require("./lib/calendar")
-const CalendarDates = require('./lib/calendar_dates')
-const FeedInfo = require("./lib/feed_info")
-const jdfEnum = require("./lib/jdfenum")
-const converter = require('json-2-csv');
-const fs = require("fs")
-const path = require("path")
+// const Stops = require("./lib/stops")
+// // const Agencies = require("./lib/agencies")
+// const Routes = require("./lib/routes")
+// const Trips = require("./lib/trips")
+// const StopTimes = require("./lib/stop_times")
+// const Calendar = require("./lib/calendar")
+// const CalendarDates = require('./lib/calendar_dates')
+// const FeedInfo = require("./lib/feed_info")
+// const jdfEnum = require("./lib/jdfenum")
+// const converter = require('json-2-csv');
+// const fs = require("fs")
+// const path = require("path")
 const removeDuplicatesCalDates = (arr) => [...new Map(arr.map(obj => [`${obj.service_id},${obj.date}`, obj])).values()];
+
+type GTFSEntities = "stops" | "agencies" | "routes" | "trips" | "stop_times" | "calendar" | "calendar_dates" | "feed_info"
 
 export class JDF2GTFS {
 
-	path: string; 
-	output: string;
+	fileProvider: JDFFileProvider
+	id_prefix: string;
+	platforms: {parent: string; code: string | number; location: LongitudeLatitude }[];
+	locations: Map<string, LongitudeLatitude>;
+	
 	stop_ids: Map<string, string>;
 	stop_codes: Map<string, string>;
-	id_prefix: string;
-	locations: Map<string, LongitudeLatitude>;
-	platforms: {parent: string; code: string | number; location: LongitudeLatitude }[];
 	timezone: Timezone;
 	lang: LanguageCode;
 	line_number_change: { [LinkaID: string ]: string };
-	line_colors: {background: HexCodeColor; foreground: HexCodeColor};
-	years: Year[];
+	lineColors: Map<string, {background: HexCodeColor; foreground: HexCodeColor}>;
 	line_route_type_override: { [LinkaID: string]: RouteVehicleType };
 	feed_info: GTFSFeedInfoObject;
 
-	lineNumberChanges: Map<string, string>
-	stops: Stop[]
+	lineNumberChanges: Map<string, string>;
+	stops: Map<string, Stop>;
+
+	private _loadedFiles: Map<JDFFileName|String, Buffer>
+	private _entities: Map<GTFSEntities, Map<string, any>>
 
     constructor(e) {
         /*let config = {
@@ -64,72 +68,174 @@ export class JDF2GTFS {
         };*/
         let now = new Date()
 
-        this.path = e.path
-        this.output = e.output || path.join(this.path, "gfts")
-        this.stop_ids = Object.assign({}, e.stop_ids)
+        // this.output = e.output || path.join(this.path, "gfts")
+		this.fileProvider = e.fileProvider
+        this.stop_ids = new Map(Object.entries(e.stop_ids ?? {}))
         this.id_prefix = e.id_prefix || ""
-        this.locations = Object.assign({}, e.locations)
+        this.locations = new Map(Object.entries(e.locations ?? {}))
         this.platforms = [].concat(e.platforms)
         this.timezone = e.timezone || "Europe/Bratislava"
         this.lang = e.lang || "sk"
-        this.line_number_changes = Object.assign({}, e.line_number_changes)
-        this.line_colors = Object.assign({}, e.line_colors)
-        this.line_network = Object.assign({}, e.line_network);
-        this.stops = []
-        this.stop_times_headsigns = Object.assign({}, e.stop_times_headsigns)
-        this.years = Array.from(new Set([now.getUTCFullYear()].concat(e.years)))
+        // this.line_number_changes = Object.assign({}, e.line_number_changes)
+        // this.line_colors = Object.assign({}, e.line_colors)
+        // this.line_network = Object.assign({}, e.line_network);
+        // this.stops = []
+        // this.stop_times_headsigns = Object.assign({}, e.stop_times_headsigns)
         this.line_route_type_override = Object.assign({}, e.line_route_type_override)
-        this.feed_publisher_name = e.feed_publisher_name
-        this.feed_publisher_url = e.feed_publisher_url
-        this.start_date = e.start_date
-        this.end_date = e.end_date
-        this.feed_contact_email = e.feed_contact_email || ""
-        this.feed_contact_url = e.feed_contact_url || ""
+        // this.feed_publisher_name = e.feed_publisher_name
+        // this.feed_publisher_url = e.feed_publisher_url
+        // this.start_date = e.start_date
+        // this.end_date = e.end_date
+        // this.feed_contact_email = e.feed_contact_email || ""
+        // this.feed_contact_url = e.feed_contact_url || ""
+
+		this.feed_info = {
+			feed_publisher_name: "IsItHere",
+			feed_puiblisher_url: "https://isithere.sk",
+			feed_lang: "sk",
+			feed_start_date: "",
+			feed_end_date: "e.feed_end_date",
+			feed_contact_email: "e.feed_contact_email",
+			feed_contact_url: "e.feed_contact_url"
+		}
+
+		this._loadedFiles = new Map()
+		this._entities = new Map()
     }
 
-    async make() {
-        let stops = await Stops(this);
-        this.stops = stops
-        let agencies = await Agencies(this)
-        let routes = await Routes(this)
-        let trips = await Trips(this)
-        let stoptimes = await StopTimes(this)
-        let calendar = await Calendar(this)
-        let calendardates = await CalendarDates(this)
-        let feedinfo = await FeedInfo(this)
+	async loadFiles() {
+		switch (this.fileProvider.type) {
+			case "zipbuffer":
+				let loaded = await FileProvider.readZipBuffer(this.fileProvider.contents)
+				this._loadedFiles = new Map(Object.entries(loaded))
+				break;
+			case "zipfile":
+				let loaded2 = await FileProvider.readZipPath(this.fileProvider.path)
+				this._loadedFiles = new Map(Object.entries(loaded2))
+				break;
+			case "folder":
+				let loaded3 = await FileProvider.readFolder(this.fileProvider.path)
+				this._loadedFiles = new Map(Object.entries(loaded3))
+				break;
+		}
+	}
 
-        calendardates = removeDuplicatesCalDates(calendardates)
+	getFile(file: JDFFileName) {
+		return this._loadedFiles.get(file)
+	}
 
-        let StopsCSV = await converter.json2csv(stops);
-        let AgencyCSV = await converter.json2csv(agencies);
-        let RoutesCSV = await converter.json2csv(routes);
-        let TripsCSV = await converter.json2csv(trips);
-        let StopTimesCSV = await converter.json2csv(stoptimes)
-        let CalendarCSV = await converter.json2csv(calendar)
-        let CalendarDatesCSV = await converter.json2csv(calendardates)
-        let FeedInfoCSV = await converter.json2csv(feedinfo)
+	hasFile(file: JDFFileName) {
+		return this._loadedFiles.has(file)
+	}
 
-        fs.writeFileSync(path.join(this.output, "stops.txt"), StopsCSV)
-        fs.writeFileSync(path.join(this.output, "agency.txt"), AgencyCSV)
-        fs.writeFileSync(path.join(this.output, "routes.txt"), RoutesCSV)
-        fs.writeFileSync(path.join(this.output, "trips.txt"), TripsCSV)
-        fs.writeFileSync(path.join(this.output, "stop_times.txt"), StopTimesCSV)
-        fs.writeFileSync(path.join(this.output, "calendar.txt"), CalendarCSV)
-        fs.writeFileSync(path.join(this.output, "calendar_dates.txt"), CalendarDatesCSV)
-        fs.writeFileSync(path.join(this.output, "feed_info.txt"), FeedInfoCSV)
-    }
+	getStop(id: string) {
+		return this._entities.get("stops")!.get(id) as Stop
+	}
+
+	async makeAgency() {
+		const Agencies = await import("./Library/core@agencies/index")
+		let generated = await Agencies.default(this)
+		this._entities.set("agencies", generated)
+		return generated
+	}
+
+	async makeStops() {
+		const Stops = await import("./Library/core@stops/index")
+		let generated = await Stops.default(this)
+		this._entities.set("stops", generated)
+		return generated
+	}
+
+	async makeTrips() {
+		const Trips = await import("./Library/core@trips/index")
+		let generated = await Trips.default(this)
+		this._entities.set("trips", generated!)
+		return generated
+	}
+
+	async makeRoutes() {
+		const Routes = await import("./Library/core@routes/index")
+		let generated = await Routes.default(this)
+		this._entities.set("routes", generated)
+		return generated
+	}
+
+	async makeStopTimes() {
+		const StopTimes = await import("./Library/core@stop_times/index")
+		let generated = await StopTimes.default(this)
+		this._entities.set("stop_times", generated)
+		return generated
+	}
+
+	async makeCalendar() {
+		const Calendar = await import("./Library/core@calendar/index")
+		let generated = await Calendar.default(this)
+		this._entities.set("calendar", generated)
+		return generated
+	}
+
+	async makeCalendarDates() {
+		const CalendarDates = await import("./Library/core@calendar_dates/index")
+		let generated = await CalendarDates.default(this)
+		this._entities.set("calendar_dates", generated)
+		return generated
+	}
+
+	async makeFeedInfo() {
+		const feed_info = new FeedInfo({
+			publisherName: this.feed_info.feed_publisher_name,
+			publisherUrl: this.feed_info.feed_puiblisher_url,
+			lang: this.feed_info.feed_lang,
+			// TODO: Finish this generator
+		})
+
+		this._entities.set("feed_info", new Map([["feed_info", feed_info]]))
+		return [ feed_info ]
+	}
+
+    // async make() {
+    //     let stops = await Stops(this);
+    //     this.stops = stops
+    //     let agencies = await Agencies(this)
+    //     let routes = await Routes(this)
+    //     let trips = await Trips(this)
+    //     let stoptimes = await StopTimes(this)
+    //     let calendar = await Calendar(this)
+    //     let calendardates = await CalendarDates(this)
+    //     let feedinfo = await FeedInfo(this)
+
+    //     calendardates = removeDuplicatesCalDates(calendardates)
+
+    //     let StopsCSV = await converter.json2csv(stops);
+    //     let AgencyCSV = await converter.json2csv(agencies);
+    //     let RoutesCSV = await converter.json2csv(routes);
+    //     let TripsCSV = await converter.json2csv(trips);
+    //     let StopTimesCSV = await converter.json2csv(stoptimes)
+    //     let CalendarCSV = await converter.json2csv(calendar)
+    //     let CalendarDatesCSV = await converter.json2csv(calendardates)
+    //     let FeedInfoCSV = await converter.json2csv(feedinfo)
+
+    //     fs.writeFileSync(path.join(this.output, "stops.txt"), StopsCSV)
+    //     fs.writeFileSync(path.join(this.output, "agency.txt"), AgencyCSV)
+    //     fs.writeFileSync(path.join(this.output, "routes.txt"), RoutesCSV)
+    //     fs.writeFileSync(path.join(this.output, "trips.txt"), TripsCSV)
+    //     fs.writeFileSync(path.join(this.output, "stop_times.txt"), StopTimesCSV)
+    //     fs.writeFileSync(path.join(this.output, "calendar.txt"), CalendarCSV)
+    //     fs.writeFileSync(path.join(this.output, "calendar_dates.txt"), CalendarDatesCSV)
+    //     fs.writeFileSync(path.join(this.output, "feed_info.txt"), FeedInfoCSV)
+    // }
 
 }
 
-exports = module.exports = JDF2GTFS
+// exports = module.exports = JDF2GTFS
 
-exports.Stops = Stops
-exports.Agencies = Agencies
-exports.Routes = Routes
-exports.Trips = Trips
-exports.StopTimes = StopTimes
-exports.Calendar = Calendar
-exports.CalendarDates = CalendarDates
-exports.FeedInfo = FeedInfo
-exports.classes = classes
-exports.enums = jdfEnum
+// exports.Stops = Stops
+// exports.Agencies = Agencies
+// exports.Routes = Routes
+// exports.Trips = Trips
+// exports.StopTimes = StopTimes
+// exports.Calendar = Calendar
+// exports.CalendarDates = CalendarDates
+// exports.FeedInfo = FeedInfo
+// exports.classes = classes
+// exports.enums = jdfEnum

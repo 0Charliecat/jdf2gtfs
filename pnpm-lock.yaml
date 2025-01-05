@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@isithere/gtfs':
+        specifier: next
+        version: 1.1.0-next-01
+      adm-zip:
+        specifier: ^0.5.16
+        version: 0.5.16
       csvtojson:
         specifier: ^2.0.10
         version: 2.0.10
@@ -24,14 +30,27 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
     devDependencies:
+      '@types/adm-zip':
+        specifier: ^0.5.7
+        version: 0.5.7
       '@types/node':
         specifier: ^22.1.0
         version: 22.1.0
 
 packages:
 
+  '@isithere/gtfs@1.1.0-next-01':
+    resolution: {integrity: sha512-QyiFwrxgZ8XQDDd53rpFZtej5TLaJxjrIkCY1QL+yvnmVfXUh6RgLrk46kRpuB/M/BPCriNi49QpliOsVuMMbA==}
+
+  '@types/adm-zip@0.5.7':
+    resolution: {integrity: sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==}
+
   '@types/node@22.1.0':
     resolution: {integrity: sha512-AOmuRF0R2/5j1knA3c6G3HOk523Ga+l+ZXltX8SF1+5oqcXijjfTd8fY3XRZqSihEu9XhtQnKYLmkFaoxgsJHw==}
+
+  adm-zip@0.5.16:
+    resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
+    engines: {node: '>=12.0'}
 
   bluebird@3.7.2:
     resolution: {integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==}
@@ -73,6 +92,9 @@ packages:
     resolution: {integrity: sha512-kwrX1y7czp1E69n2ajbG65mIo9dqvJ+8aBQXOGVxqwvNbsXdFM6Lq37dLAY3mknUwru8CfcCbfOLL/gMo+fi3g==}
     engines: {node: '>=0.10.0'}
 
+  timezone-enum@1.0.4:
+    resolution: {integrity: sha512-CihBHcf/JZEtDF1xSDAXPHbfjpOhRxUtE4dhbYqeI8Zuy1zq79AgQ5hMkf38uA4WZb24U3VHzKcOmmcvfsefXw==}
+
   typescript@5.5.4:
     resolution: {integrity: sha512-Mtq29sKDAEYP7aljRgtPOpTvOfbwRWlS6dPRzwjdE+C0R4brX/GUyhHSecbHMFLNBLcJIPt9nl9yG5TZ1weH+Q==}
     engines: {node: '>=14.17'}
@@ -83,9 +105,20 @@ packages:
 
 snapshots:
 
+  '@isithere/gtfs@1.1.0-next-01':
+    dependencies:
+      timezone-enum: 1.0.4
+      typescript: 5.5.4
+
+  '@types/adm-zip@0.5.7':
+    dependencies:
+      '@types/node': 22.1.0
+
   '@types/node@22.1.0':
     dependencies:
       undici-types: 6.13.0
+
+  adm-zip@0.5.16: {}
 
   bluebird@3.7.2: {}
 
@@ -119,6 +152,8 @@ snapshots:
   strip-bom@2.0.0:
     dependencies:
       is-utf8: 0.2.1
+
+  timezone-enum@1.0.4: {}
 
   typescript@5.5.4: {}
 

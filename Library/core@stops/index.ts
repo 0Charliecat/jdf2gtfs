@@ -1,28 +1,26 @@
-import path from 'path'
-import { Stop, StopLocationType } from '../@isithere/gtfs_types/Stop'
+import { Stop, StopLocationType } from '@isithere/gtfs'
 import { JDF2GTFS } from '../..'
 import { getContentsArray } from '../_app/_reusables/getContentsArray'
-
-
-// Defined JDF Headers from Docs
-const JDFHeaders = [ "id", "city", "borough", "name", "nearby_city", "country", "pk1", "pk2", "pk3", "pk4", "pk5", "pk6" ]
+import { Zastavky, headers } from '../@isithere/jdf_types/Zastavky'
 
 export default async function runtime(config: JDF2GTFS) {
 	const { stop_ids, stop_codes, id_prefix, locations } = config
-	const _Zastavky: JDFZastavkyObject[] = await getContentsArray(
-		path.join(config.path, 'zastavky.txt'),
-		JDFHeaders
+	const _Zastavky: Zastavky[] = await getContentsArray(
+		config.getFile("zastavky")!,
+		headers
 	)
 
 	let Entities: Map<string, Stop> = new Map()
 
+	console.log({ stop_ids, stop_codes, id_prefix, locations })
+
 	for (let _ of _Zastavky) {
-		let location = locations.get(_.id)
+		let location = locations.get(_.stopID)
 
 		let computedStop = new Stop({
-			id: stop_ids.has(_.id) ? stop_ids.get(_.id) : id_prefix+_.id,
+			id: stop_ids.has(_.stopID) ? stop_ids.get(_.stopID) : id_prefix+_.stopID,
 			name: _StationNameConstructor(_),
-			code: stop_codes.get(_.id),
+			// code: stop_codes.get(_.stopID) ?? undefined,
 			latitude: (location ?? [0,0])[1],
 			longitude: (location ?? [0,0])[0],
 			locationType: StopLocationType.Station
@@ -52,25 +50,10 @@ export default async function runtime(config: JDF2GTFS) {
  * Constructing force for Stop Names
  * @returns {String} i.e. Bratislava, Vajnory, MiÚ Vajnory
  */
-function _StationNameConstructor(stop: JDFZastavkyObject) {
-	let resultingName = [ stop.city, stop.borough, stop.name ]
+function _StationNameConstructor(stop: Zastavky) {
+	let resultingName = [ stop.localityName, stop.localityPart, stop.nearPlace ]
 	
 	return resultingName
 		.filter(str => (str ?? '').length !== 0)
 		.join(", ")
-}
-
-interface JDFZastavkyObject {
-	id: string;
-	city?: string;
-	borough?: string;
-	name: string;
-	nearby_city?: string;
-	county?: string;
-	PevnyKod_1: string;
-	PevnyKod_2: string;
-	PevnyKod_3: string;
-	PevnyKod_4: string;
-	PevnyKod_5: string;
-	PevnyKod_6: string;
 }
