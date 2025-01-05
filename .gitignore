@@ -133,3 +133,6 @@ dist
 .DS_Store
 
 .out
+
+testing.ts
+testing.js
