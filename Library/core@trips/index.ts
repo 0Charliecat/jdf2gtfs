@@ -1,7 +1,7 @@
 import path from "path";
 import { JDF2GTFS } from "../.."
 import { getContentsArray } from "../_app/_reusables/getContentsArray";
-import { Trip, TripBikesAllowed, TripWheelchairAccessibility } from '@isithere/gtfs'
+import { Trip, TripBikesAllowed, TripDirection, TripWheelchairAccessibility } from '@isithere/gtfs'
 import { pkArray } from "../core@pevnykod";
 import { PevnyKodTripModificators } from "../core@pevnykod/types";
 import { Spoje, headers } from "../@isithere/jdf_types/Spoje";
@@ -35,10 +35,15 @@ export default async function runtime(config: JDF2GTFS) {
 			service: key+"_C",
 			route: `${id_prefix}${_.lineNumber}r${_.lineResolution}`,
 			headsign,
+			direction: (+_.tripNumber % 2) === 0 ? TripDirection.Outbound : TripDirection.Inbound,
 			shortName: `${headsign} (Spoj ${_.tripNumber})`,
 			wheelchairAccessible: _pk.includes(PevnyKodTripModificators.TripIsAccessible) ? TripWheelchairAccessibility.Some : TripWheelchairAccessibility.NoInformation,
 			bikesAllowed: _pk.includes(PevnyKodTripModificators.TripAllowsBikes) ? TripBikesAllowed.Allowed : TripBikesAllowed.NoInformation
 		})
+
+		let requestEntityChanges = config.requestEntityChanges?.Trips({ gtfs: computedTrip, jdf: _ })
+		if (requestEntityChanges)
+			computedTrip = Object.assign(computedTrip, requestEntityChanges)
 
 		Entities.set(key, computedTrip)
 	}

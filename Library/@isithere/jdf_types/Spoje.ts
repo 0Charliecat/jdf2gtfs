@@ -39,7 +39,7 @@
 
 /// Reference to a `Spoj`
 /// > ⚠️ Warning: Use with `Linky.LineNumber` 
-type TripNumber = number
+type TripNumber = string
 
 export interface Spoje {
 	lineNumber: string

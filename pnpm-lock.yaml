@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@isithere/gtfs':
         specifier: next
-        version: 1.1.0-next-01
+        version: 1.1.0-next-02
       adm-zip:
         specifier: ^0.5.16
         version: 0.5.16
@@ -21,32 +21,32 @@ importers:
         specifier: ^0.6.3
         version: 0.6.3
       json-2-csv:
-        specifier: ^4.1.0
+        specifier: ^4.1.1
         version: 4.1.1
       slovak-holidays:
         specifier: ^1.0.1
         version: 1.0.1
       typescript:
-        specifier: ^5.5.4
-        version: 5.5.4
+        specifier: ^5.7.2
+        version: 5.7.2
     devDependencies:
       '@types/adm-zip':
         specifier: ^0.5.7
         version: 0.5.7
       '@types/node':
-        specifier: ^22.1.0
-        version: 22.1.0
+        specifier: ^22.10.5
+        version: 22.10.5
 
 packages:
 
-  '@isithere/gtfs@1.1.0-next-01':
-    resolution: {integrity: sha512-QyiFwrxgZ8XQDDd53rpFZtej5TLaJxjrIkCY1QL+yvnmVfXUh6RgLrk46kRpuB/M/BPCriNi49QpliOsVuMMbA==}
+  '@isithere/gtfs@1.1.0-next-02':
+    resolution: {integrity: sha512-cVqyHMD72Ef7z+ANcWs+6CD5xZAhBI/Jwu1C5q029ah2PUKGSdGVkESBS0ymD2dAbjiJg0nRAfQvv1r8zNRuLQ==}
 
   '@types/adm-zip@0.5.7':
     resolution: {integrity: sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==}
 
-  '@types/node@22.1.0':
-    resolution: {integrity: sha512-AOmuRF0R2/5j1knA3c6G3HOk523Ga+l+ZXltX8SF1+5oqcXijjfTd8fY3XRZqSihEu9XhtQnKYLmkFaoxgsJHw==}
+  '@types/node@22.10.5':
+    resolution: {integrity: sha512-F8Q+SeGimwOo86fiovQh8qiXfFEh2/ocYv7tU5pJ3EXMSSxk1Joj5wefpFK2fHTf/N6HKGSxIDBT9f3gCxXPkQ==}
 
   adm-zip@0.5.16:
     resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
@@ -95,28 +95,28 @@ packages:
   timezone-enum@1.0.4:
     resolution: {integrity: sha512-CihBHcf/JZEtDF1xSDAXPHbfjpOhRxUtE4dhbYqeI8Zuy1zq79AgQ5hMkf38uA4WZb24U3VHzKcOmmcvfsefXw==}
 
-  typescript@5.5.4:
-    resolution: {integrity: sha512-Mtq29sKDAEYP7aljRgtPOpTvOfbwRWlS6dPRzwjdE+C0R4brX/GUyhHSecbHMFLNBLcJIPt9nl9yG5TZ1weH+Q==}
+  typescript@5.7.2:
+    resolution: {integrity: sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==}
     engines: {node: '>=14.17'}
     hasBin: true
 
-  undici-types@6.13.0:
-    resolution: {integrity: sha512-xtFJHudx8S2DSoujjMd1WeWvn7KKWFRESZTMeL1RptAYERu29D6jphMjjY+vn96jvN3kVPDNxU/E13VTaXj6jg==}
+  undici-types@6.20.0:
+    resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
 snapshots:
 
-  '@isithere/gtfs@1.1.0-next-01':
+  '@isithere/gtfs@1.1.0-next-02':
     dependencies:
       timezone-enum: 1.0.4
-      typescript: 5.5.4
+      typescript: 5.7.2
 
   '@types/adm-zip@0.5.7':
     dependencies:
-      '@types/node': 22.1.0
+      '@types/node': 22.10.5
 
-  '@types/node@22.1.0':
+  '@types/node@22.10.5':
     dependencies:
-      undici-types: 6.13.0
+      undici-types: 6.20.0
 
   adm-zip@0.5.16: {}
 
@@ -155,6 +155,6 @@ snapshots:
 
   timezone-enum@1.0.4: {}
 
-  typescript@5.5.4: {}
+  typescript@5.7.2: {}
 
-  undici-types@6.13.0: {}
+  undici-types@6.20.0: {}

@@ -4,9 +4,9 @@
     "adm-zip": "^0.5.16",
     "csvtojson": "^2.0.10",
     "iconv-lite": "^0.6.3",
-    "json-2-csv": "^4.1.0",
+    "json-2-csv": "^4.1.1",
     "slovak-holidays": "^1.0.1",
-    "typescript": "^5.5.4"
+    "typescript": "^5.7.2"
   },
   "name": "jdf2gtfs",
   "description": "a nodejs script and dependency to convert Czechoslovak JDF timetable format to GTFS",
@@ -33,6 +33,6 @@
   "homepage": "https://github.com/0Charliecat/jdf2gtfs#readme",
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
-    "@types/node": "^22.1.0"
+    "@types/node": "^22.10.5"
   }
 }

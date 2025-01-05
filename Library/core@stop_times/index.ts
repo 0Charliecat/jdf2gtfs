@@ -20,18 +20,24 @@ export default async function runtime(config: JDF2GTFS) {
 			continue;
 
 		let tripId = `${id_prefix}${_.lineNumber}r${_.lineResolution}_${_.tripNumber}`
+		let stopId = `${id_prefix}${_.stopId}`
+		let platformId = `${id_prefix}${_.stopId}_${_.platformId.length > 0 ? _.platformId : _.platformCode}`
 		if (!_counter[tripId]) _counter[tripId] = 0
 		let _pk = pkArray([ _.pk_1, _.pk_2, _.pk_3 ])
 
 		let computedStopTime = new StopTime({
 			trip: tripId,
-			stop: id_prefix+_.stopId,
+			stop: config.getStop(platformId) ? platformId : stopId,
 			departure: convertTimeFormat(_.departureTime),
 			arrival: convertTimeFormat(_.arrivalTime),
 			stopSequence: _counter[tripId]++,
 			pickUp: convertPickUpType(_pk),
 			dropOff: convertDropOffType(_pk),
 		})
+
+		let requestEntityChanges = config.requestEntityChanges?.StopTimes({ gtfs: computedStopTime, jdf: _ })
+		if (requestEntityChanges)
+			computedStopTime = Object.assign(computedStopTime, requestEntityChanges)
 
 		Entities.set(computedStopTime.toString(), computedStopTime)
 	}

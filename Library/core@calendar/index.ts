@@ -29,6 +29,7 @@ export default async function runtime(config: JDF2GTFS) {
 
 		let _pk = pkArray([ _.pk_1, _.pk_2, _.pk_3, _.pk_4, _.pk_5, _.pk_6, _.pk_7, _.pk_8, _.pk_9, _.pk_10 ])
 		let workdays = _pk.includes(PevnyKodTripExecution.OnlyWorkdays)
+		let _pkSetsDays = Object.values(PevnyKodTripExecution).filter(pk => _pk.includes(pk)).length > 0
 
 		let computedCalendar = new Calendar({
 			id: key,
@@ -36,14 +37,25 @@ export default async function runtime(config: JDF2GTFS) {
 			start: dateConverter(_linka.validFrom),
 			end: dateConverter(_linka.validUntil),
 
-			monday: workdays || _pk.includes(PevnyKodTripExecution.OnlyMondays),
-			tuesday: workdays || _pk.includes(PevnyKodTripExecution.OnlyTuesdays),
-			wednesday: workdays || _pk.includes(PevnyKodTripExecution.OnlyWednesdays),
-			thursday: workdays || _pk.includes(PevnyKodTripExecution.OnlyThursdays),
-			friday: workdays || workdays || _pk.includes(PevnyKodTripExecution.OnlyFridays),
-			saturday: _pk.includes(PevnyKodTripExecution.OnlySaturdays),
-			sunday: _pk.includes(PevnyKodTripExecution.OnlySundays) || _pk.includes(PevnyKodTripExecution.OnlyFreedays)
+			monday: 
+				_pkSetsDays ? workdays || _pk.includes(PevnyKodTripExecution.OnlyMondays) : true,
+			tuesday: 
+				_pkSetsDays ? workdays || _pk.includes(PevnyKodTripExecution.OnlyTuesdays) : true,
+			wednesday: 
+				_pkSetsDays ? workdays || _pk.includes(PevnyKodTripExecution.OnlyWednesdays) : true,
+			thursday: 
+				_pkSetsDays ? workdays || _pk.includes(PevnyKodTripExecution.OnlyThursdays) : true,
+			friday: 
+				_pkSetsDays ? workdays || _pk.includes(PevnyKodTripExecution.OnlyFridays) : true,
+			saturday: 
+				_pkSetsDays ? _pk.includes(PevnyKodTripExecution.OnlySaturdays) : true,
+			sunday: 
+				_pkSetsDays ? _pk.includes(PevnyKodTripExecution.OnlySundays) || _pk.includes(PevnyKodTripExecution.OnlyFreedays) : true
 		})
+
+		let requestEntityChanges = config.requestEntityChanges?.Calendars({ gtfs: computedCalendar, jdf: _ })
+		if (requestEntityChanges)
+			computedCalendar = Object.assign(computedCalendar, requestEntityChanges)
 
 		Entities.set(key, computedCalendar)
 	}

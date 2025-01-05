@@ -24,6 +24,10 @@ export default async function runtime(config: JDF2GTFS) {
 			email: _.email
 		})
 
+		let requestEntityChanges = config.requestEntityChanges?.Agencies({ gtfs: computedAgency, jdf: _ })
+		if (requestEntityChanges)
+			computedAgency = Object.assign(computedAgency, requestEntityChanges)
+
 		Entities.set(computedAgency.id, computedAgency)
 	}
 

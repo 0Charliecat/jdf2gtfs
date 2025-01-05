@@ -34,10 +34,10 @@ export default async function runtime(config: JDF2GTFS) {
 		let _linka = _Linky.find(l => l.number === _.lineNumber && l.lineResolution === _.lineResolution)
 		if (!_linka)
 			throw new Error(`CALENDAR | Can't find a line for trip "${key.replace('_C', '')}"`)
-		let _casKod = _CasKody.filter(c => c.lineNumber === _.lineNumber && c.lineResolution === _.lineResolution) ?? []
-
+		let _casKod = _CasKody.filter(c => c.lineNumber === _.lineNumber && c.lineResolution === _.lineResolution && c.tripNumber === _.tripNumber) ?? []
+		
 		let _pk = pkArray([ _.pk_1, _.pk_2, _.pk_3, _.pk_4, _.pk_5, _.pk_6, _.pk_7, _.pk_8, _.pk_9, _.pk_10 ])
-
+		
 		let _calendarDates: Date[] = getDaysArray(dateConverter(_linka.validFrom), dateConverter(_linka.validUntil))
 			.filter(d => dateFilter(_pk, d))
 		let _calendarChanges: { date: Date, exception: CalendarDateExcpetion }[] = []
@@ -52,7 +52,10 @@ export default async function runtime(config: JDF2GTFS) {
 				if (_c.exceptionType !== CasKodTyp.ONLY_GOES) continue
 				_calendarChanges.push({ date: dateConverter(_c.dateFrom!), exception: CalendarDateExcpetion.Added })
 				_calendarDates.push(dateConverter(_c.dateFrom!))
+
 			}
+
+			continue;
 			// TODO: add killer for the rest of the days in the calendar
 		}
 
@@ -91,14 +94,15 @@ export default async function runtime(config: JDF2GTFS) {
 				_calendarChanges.push(...dateRange.map(d => ({ date: d, exception: CalendarDateExcpetion.Removed })))
 			}
 		}
+		
 
 
-		for (let _d of _calendarDates) {
-			if (!_calendarDates.includes(_d)) continue
+		for (let _d of _calendarChanges) {
+			// if (!_calendarDates.includes(_d.date)) continue
 			let _calendarDate = new CalendarDate({
 				service: key,
-				date: _d,
-				exception: CalendarDateExcpetion.Added
+				date: _d.date,
+				exception: _d.exception
 			})
 			Entities.set(counter + "", _calendarDate)
 			counter++

@@ -1,7 +1,10 @@
-import { FeedInfo, GTFSFeedInfoObject, RouteVehicleType, Stop } from "@isithere/gtfs"
+import { Agency, FeedInfo, GTFSFeedInfoObject, RouteVehicleType, Stop } from "@isithere/gtfs"
 import { HexCodeColor, LanguageCode, LongitudeLatitude, Timezone, Year } from "./Library/_app/_types/Simples"
 import { JDFFileName, JDFFileProvider } from "./Library/lib@FileProvider/_types/FileProviderTypes";
 import FileProvider from "./Library/lib@FileProvider/FileProvider";
+import { RequestGTFSEntityChanges } from "./Library/_app/_types/RequestEntityChanges";
+import { CustomPlatform } from "./Library/_app/_types/CustomPlatform";
+import { SetupPevnyKod } from "./Library/core@pevnykod";
 
 // const Stops = require("./lib/stops")
 // // const Agencies = require("./lib/agencies")
@@ -23,23 +26,30 @@ export class JDF2GTFS {
 
 	fileProvider: JDFFileProvider
 	id_prefix: string;
-	platforms: {parent: string; code: string | number; location: LongitudeLatitude }[];
+	platforms: CustomPlatform[];
 	locations: Map<string, LongitudeLatitude>;
+	requestEntityChanges: RequestGTFSEntityChanges;
+	lineColors: Map<string, {background: HexCodeColor; foreground: HexCodeColor}>;
 	
 	stop_ids: Map<string, string>;
 	stop_codes: Map<string, string>;
 	timezone: Timezone;
 	lang: LanguageCode;
-	line_number_change: { [LinkaID: string ]: string };
-	lineColors: Map<string, {background: HexCodeColor; foreground: HexCodeColor}>;
-	line_route_type_override: { [LinkaID: string]: RouteVehicleType };
 	feed_info: GTFSFeedInfoObject;
 
 	lineNumberChanges: Map<string, string>;
 	stops: Map<string, Stop>;
 
+	overrides: {
+		Route: {
+			ShortName: Map<string, string>,
+			Type: Map<string, RouteVehicleType>
+		}
+	}
+
 	private _loadedFiles: Map<JDFFileName|String, Buffer>
 	private _entities: Map<GTFSEntities, Map<string, any>>
+	private _customizable: { Stops: { PlatformName: string } }
 
     constructor(e) {
         /*let config = {
@@ -70,18 +80,39 @@ export class JDF2GTFS {
 
         // this.output = e.output || path.join(this.path, "gfts")
 		this.fileProvider = e.fileProvider
+		this.requestEntityChanges = Object.assign(
+			{
+				Stops: ({ gtfs, jdf }) => false,
+				Agencies: ({ gtfs, jdf }) => false,
+				Routes: ({ gtfs, jdf }) => false,
+				Trips: ({ gtfs, jdf }) => false,
+				StopTimes: ({ gtfs, jdf }) => false,
+				Calendars: ({ gtfs, jdf }) => false,
+				CalendarDates: ({ gtfs, jdf }) => false
+			},
+			e.requestEntityChanges
+		)
         this.stop_ids = new Map(Object.entries(e.stop_ids ?? {}))
         this.id_prefix = e.id_prefix || ""
         this.locations = new Map(Object.entries(e.locations ?? {}))
         this.platforms = [].concat(e.platforms)
         this.timezone = e.timezone || "Europe/Bratislava"
         this.lang = e.lang || "sk"
+		this.stop_codes = new Map(Object.entries(e.stop_codes ?? {}))
+
+		this.lineColors = new Map(Object.entries(Object.assign({ default: { background: "ffffff", foreground: "000000" }}, e.line_colors ?? {})))
+
+		this.overrides = {
+			Route: {
+				ShortName: new Map(Object.entries(e.overrides?.Route?.ShortName ?? {})),
+				Type: new Map(Object.entries(e.overrides?.Route?.Type ?? {}))
+			}
+		}
         // this.line_number_changes = Object.assign({}, e.line_number_changes)
         // this.line_colors = Object.assign({}, e.line_colors)
         // this.line_network = Object.assign({}, e.line_network);
         // this.stops = []
         // this.stop_times_headsigns = Object.assign({}, e.stop_times_headsigns)
-        this.line_route_type_override = Object.assign({}, e.line_route_type_override)
         // this.feed_publisher_name = e.feed_publisher_name
         // this.feed_publisher_url = e.feed_publisher_url
         // this.start_date = e.start_date
@@ -118,6 +149,8 @@ export class JDF2GTFS {
 				this._loadedFiles = new Map(Object.entries(loaded3))
 				break;
 		}
+
+		SetupPevnyKod(this)
 	}
 
 	getFile(file: JDFFileName) {
@@ -132,7 +165,7 @@ export class JDF2GTFS {
 		return this._entities.get("stops")!.get(id) as Stop
 	}
 
-	async makeAgency() {
+	async makeAgencies() {
 		const Agencies = await import("./Library/core@agencies/index")
 		let generated = await Agencies.default(this)
 		this._entities.set("agencies", generated)
@@ -167,7 +200,7 @@ export class JDF2GTFS {
 		return generated
 	}
 
-	async makeCalendar() {
+	async makeCalendars() {
 		const Calendar = await import("./Library/core@calendar/index")
 		let generated = await Calendar.default(this)
 		this._entities.set("calendar", generated)

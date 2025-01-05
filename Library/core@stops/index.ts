@@ -12,19 +12,21 @@ export default async function runtime(config: JDF2GTFS) {
 
 	let Entities: Map<string, Stop> = new Map()
 
-	console.log({ stop_ids, stop_codes, id_prefix, locations })
-
 	for (let _ of _Zastavky) {
 		let location = locations.get(_.stopID)
 
 		let computedStop = new Stop({
-			id: stop_ids.has(_.stopID) ? stop_ids.get(_.stopID) : id_prefix+_.stopID,
+			id: id_prefix+_.stopID,
 			name: _StationNameConstructor(_),
-			// code: stop_codes.get(_.stopID) ?? undefined,
+			code: stop_codes.get(_.stopID) ?? undefined,
 			latitude: (location ?? [0,0])[1],
 			longitude: (location ?? [0,0])[0],
 			locationType: StopLocationType.Station
 		})
+
+		let requestEntityChanges = config.requestEntityChanges?.Stops({ gtfs: computedStop, jdf: _ })
+		if (requestEntityChanges)
+			computedStop = Object.assign(computedStop, requestEntityChanges)
 
 		Entities.set(computedStop.id, computedStop)
 	}
@@ -32,13 +34,17 @@ export default async function runtime(config: JDF2GTFS) {
 	for (let _ of config.platforms) {
 		let computedPlatform = new Stop({
 			id: stop_ids.has(_.parent) ? `${stop_ids.get(_.parent)}_${_.code}` : `${id_prefix}${_.parent}_${_.code}`,
-			name: Entities.get(stop_ids.get(_.parent) ?? `${id_prefix}${_.parent}`)?.name ?? "",
+			name: `${Entities.get(`${id_prefix}${_.parent}`)?.name ?? ""} Platform ${_.code}`,
 			platformCode: _.code,
 			locationType: StopLocationType.Platform,
 			parentStation: stop_ids.get(_.parent) ?? `${id_prefix}${_.parent}`,
 			latitude: _.location[1],
 			longitude: _.location[0],
 		})
+
+		let requestEntityChanges = config.requestEntityChanges?.Stops({ gtfs: computedPlatform, platform: _ })
+		if (requestEntityChanges)
+			computedPlatform = Object.assign(computedPlatform, requestEntityChanges)
 
 		Entities.set(computedPlatform.id, computedPlatform)
 	}

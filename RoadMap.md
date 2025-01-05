@@ -17,6 +17,8 @@
 - [ ] generation of report of warnings and errors
 - [ ] follow spec designer best practises (see https://gtfs.org/documentation/schedule/schedule-best-practices/)
 - [ ] (maybe) add support to generate GTFS-Flex
+- [ ] add overrides by id for every entity
+- [ ] check if IDs exist in generators
 
 ## Stops
 - [ ] use `Oznacniky` for automatic detection of Platforms and asign them found Coordinates
@@ -32,7 +34,7 @@
 - [ ] **fix colors**
 
 ## Trips
-- [ ] allow for automatic direction_id asumption
+- [x] allow for automatic direction_id asumption
 
 ## Stop Times
 - [ ] fix stop time platform usage
