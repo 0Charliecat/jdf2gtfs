@@ -25,19 +25,19 @@
 - [ ] fix platform generation
 - [ ] Platform `stop_name` generation should follow best practises set by the Standard
 - [ ] allow for on-the-fly generation of non-stop/non-platform entities
-- [ ] **fix stop generation**
+- [x] **fix stop generation**
 
 ## Routes
 - [ ] allow for predetermined route_short_name change using a config
 - [ ] allow for optional setting of Extended GTFS Route types (see https://developers.google.com/transit/gtfs/reference/extended-route-types)
 - [ ] allow to generate `AltLinky` properties if wished by the feed consumer
-- [ ] **fix colors**
+- [x] **fix colors**
 
 ## Trips
 - [x] allow for automatic direction_id asumption
 
 ## Stop Times
-- [ ] fix stop time platform usage
+- [x] fix stop time platform usage
 - [ ] allow for PevnyKod `§`, `A`, `B` and `C` properties
 - [ ] allow for PevnyKod `!` property
 

@@ -1,24 +1,10 @@
-import { Agency, FeedInfo, GTFSFeedInfoObject, RouteVehicleType, Stop } from "@isithere/gtfs"
+import { Agency, FeedInfo, GTFSFeedInfoObject, RouteVehicleType, RouteVehicleTypeExtended, Stop } from "@isithere/gtfs"
 import { HexCodeColor, LanguageCode, LongitudeLatitude, Timezone, Year } from "./Library/_app/_types/Simples"
 import { JDFFileName, JDFFileProvider } from "./Library/lib@FileProvider/_types/FileProviderTypes";
 import FileProvider from "./Library/lib@FileProvider/FileProvider";
 import { RequestGTFSEntityChanges } from "./Library/_app/_types/RequestEntityChanges";
 import { CustomPlatform } from "./Library/_app/_types/CustomPlatform";
 import { SetupPevnyKod } from "./Library/core@pevnykod";
-
-// const Stops = require("./lib/stops")
-// // const Agencies = require("./lib/agencies")
-// const Routes = require("./lib/routes")
-// const Trips = require("./lib/trips")
-// const StopTimes = require("./lib/stop_times")
-// const Calendar = require("./lib/calendar")
-// const CalendarDates = require('./lib/calendar_dates')
-// const FeedInfo = require("./lib/feed_info")
-// const jdfEnum = require("./lib/jdfenum")
-// const converter = require('json-2-csv');
-// const fs = require("fs")
-// const path = require("path")
-const removeDuplicatesCalDates = (arr) => [...new Map(arr.map(obj => [`${obj.service_id},${obj.date}`, obj])).values()];
 
 type GTFSEntities = "stops" | "agencies" | "routes" | "trips" | "stop_times" | "calendar" | "calendar_dates" | "feed_info"
 
@@ -30,12 +16,12 @@ export class JDF2GTFS {
 	locations: Map<string, LongitudeLatitude>;
 	requestEntityChanges: RequestGTFSEntityChanges;
 	lineColors: Map<string, {background: HexCodeColor; foreground: HexCodeColor}>;
+	feed_info: GTFSFeedInfoObject;
 	
 	stop_ids: Map<string, string>;
 	stop_codes: Map<string, string>;
 	timezone: Timezone;
 	lang: LanguageCode;
-	feed_info: GTFSFeedInfoObject;
 
 	lineNumberChanges: Map<string, string>;
 	stops: Map<string, Stop>;
@@ -43,13 +29,12 @@ export class JDF2GTFS {
 	overrides: {
 		Route: {
 			ShortName: Map<string, string>,
-			Type: Map<string, RouteVehicleType>
+			Type: Map<string, RouteVehicleType | RouteVehicleTypeExtended>
 		}
 	}
 
 	private _loadedFiles: Map<JDFFileName|String, Buffer>
 	private _entities: Map<GTFSEntities, Map<string, any>>
-	private _customizable: { Stops: { PlatformName: string } }
 
     constructor(e) {
         /*let config = {
@@ -219,10 +204,15 @@ export class JDF2GTFS {
 			publisherName: this.feed_info.feed_publisher_name,
 			publisherUrl: this.feed_info.feed_puiblisher_url,
 			lang: this.feed_info.feed_lang,
+			start: new Date(this.feed_info.feed_start_date!),
+			end: new Date(this.feed_info.feed_end_date!),
+			version: this.feed_info.feed_version,
+			contactEmail: this.feed_info.feed_contact_email,
+			contactUrl: this.feed_info.feed_contact_url
 			// TODO: Finish this generator
 		})
 
-		this._entities.set("feed_info", new Map([["feed_info", feed_info]]))
+		this._entities.set("feed_info", new Map([["0", feed_info]]))
 		return [ feed_info ]
 	}
 
