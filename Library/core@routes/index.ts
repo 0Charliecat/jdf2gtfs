@@ -20,18 +20,19 @@ export default async function runtime(config: JDF2GTFS) {
 	let Entities: Map<string, Route> = new Map()
 
 	for (let _ of _Linky) {
-		let _ext = _LinExt.find(ext => ext.lineNumber === _.number)
+		let _ext = _LinExt.find(ext => ext.lineNumber === _.number) ?? null
 		let computedRoute = new Route({
 			id: `${id_prefix}${_.number}r${_.lineResolution}`,
 			agency: getAgencyID(id_prefix, _.agencyID, _.agencyResolution),
-			shortName: config.overrides.Route.ShortName.get(_.number) ?? _ext?.preference ? _ext!.routeShortName : _.number,
+			shortName: (config.overrides.Route.ShortName.get(_.number)) ?? (_ext?.preference ? _ext.routeShortName : _.number),
 			longName: _.name,
 			type: config.overrides.Route.Type.get(_.number) ?? _GetGTFSRouteType(_.vehicleType),
 			backgroundColor: lineColors.get(_.number)?.background ?? lineColors.get("default")?.background,
 			foregroundColor: lineColors.get(_.number)?.foreground ?? lineColors.get("default")?.foreground
 		})
 
-		console.log(computedRoute.backgroundColor, lineColors.get(_.number)?.background, lineColors.get("default")?.background)
+		if ((computedRoute.longName ?? "").startsWith(computedRoute.shortName!))
+			computedRoute.longName = computedRoute.longName?.replace(computedRoute.shortName!, "").trim()
 
 		let requestEntityChanges = config.requestEntityChanges?.Routes({ gtfs: computedRoute, jdf: _ })
 		if (requestEntityChanges)
