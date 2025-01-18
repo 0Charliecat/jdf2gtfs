@@ -1,6 +1,8 @@
 import AdmZip from "adm-zip";
 import fs from "fs/promises"
 import { JDFFileAllow, JDFFileName } from "./_types/FileProviderTypes";
+import { GTFSEntities } from "../_app/_types/GTFSEntities";
+import { json2csv } from "json-2-csv";
 
 async function readZipBuffer(buffer: Buffer) {
 	const zip = new AdmZip(buffer);
@@ -35,8 +37,19 @@ async function readFolder(path: string) {
 	return files;
 }
 
+async function createZip(entities: Map<GTFSEntities, Map<string, any>>) {
+	const zip = new AdmZip();
+	for (const [entity, data] of entities) {
+		let csv = await json2csv([...data.values()].map((v) => v.toJSON()))
+		// console.log(csv)
+		zip.addFile(entity + ".txt", Buffer.from(csv))
+	}
+	return zip.toBuffer()
+}
+
 export default {
 	readZipBuffer,
 	readZipPath,
-	readFolder
+	readFolder,
+	createZip
 }

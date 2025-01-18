@@ -18,21 +18,24 @@ export default async function runtime(config: JDF2GTFS) {
 	for (let _ of _Zasspoje) {
 		if (!isHHMM(_.departureTime, _.arrivalTime))
 			continue;
-
+		
 		let tripId = `${id_prefix}${_.lineNumber}r${_.lineResolution}_${_.tripNumber}`
 		let stopId = `${id_prefix}${_.stopId}`
 		let platformId = `${id_prefix}${_.stopId}_${_.platformId.length > 0 ? _.platformId : _.platformCode}`
 		if (!_counter[tripId]) _counter[tripId] = 0
 		let _pk = pkArray([ _.pk_1, _.pk_2, _.pk_3 ])
 
+		// if (!config.getStop(platformId)) console.log(!!config.getStop(platformId), platformId, config.getStop(stopId).name)
+
 		let computedStopTime = new StopTime({
 			trip: tripId,
 			stop: config.getStop(platformId) ? platformId : stopId,
-			departure: convertTimeFormat(_.departureTime),
-			arrival: convertTimeFormat(_.arrivalTime),
+			departure: convertTimeFormat(_.departureTime) ?? convertTimeFormat(_.arrivalTime)!,
+			arrival: convertTimeFormat(_.arrivalTime) ?? convertTimeFormat(_.departureTime)!,
 			stopSequence: _counter[tripId]++,
 			pickUp: convertPickUpType(_pk),
 			dropOff: convertDropOffType(_pk),
+			timepoint: 0
 		})
 
 		let requestEntityChanges = config.requestEntityChanges?.StopTimes({ gtfs: computedStopTime, jdf: _ })
@@ -46,7 +49,7 @@ export default async function runtime(config: JDF2GTFS) {
 }
 
 function isHHMM(departureTime: string, arrivalTime: string): boolean {
-	return /\d{4}/.test(departureTime) && /\d{4}/.test(arrivalTime)
+	return /\d{4}/.test(departureTime) || /\d{4}/.test(arrivalTime)
 }
 
 function convertPickUpType(pk: PevnyKodEnum[]): StopTimePickDrop {
@@ -71,6 +74,7 @@ function convertDropOffType(pk: PevnyKodEnum[]): StopTimePickDrop {
 	return StopTimePickDrop.Regular
 }
 
-function convertTimeFormat(hhmm: string): string {
-	return `${hhmm.slice(0,2)}:${hhmm.slice(2)}:00`
+function convertTimeFormat(hhmm: string): (string|null) {
+	if (hhmm.length !== 4) return null
+	else return `${hhmm.slice(0,2)}:${hhmm.slice(2)}:00`
 }

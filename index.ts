@@ -5,8 +5,7 @@ import FileProvider from "./Library/lib@FileProvider/FileProvider";
 import { RequestGTFSEntityChanges } from "./Library/_app/_types/RequestEntityChanges";
 import { CustomPlatform } from "./Library/_app/_types/CustomPlatform";
 import { SetupPevnyKod } from "./Library/core@pevnykod";
-
-type GTFSEntities = "stops" | "agencies" | "routes" | "trips" | "stop_times" | "calendar" | "calendar_dates" | "feed_info"
+import { GTFSEntities } from "./Library/_app/_types/GTFSEntities";
 
 export class JDF2GTFS {
 
@@ -85,7 +84,7 @@ export class JDF2GTFS {
         this.lang = e.lang || "sk"
 		this.stop_codes = new Map(Object.entries(e.stop_codes ?? {}))
 
-		this.lineColors = new Map(Object.entries(Object.assign({ default: { background: "ffffff", foreground: "000000" }}, e.line_colors ?? {})))
+		this.lineColors = new Map(Object.entries(Object.assign({ default: { background: "ffffff", foreground: "000000" }}, e.lineColors ?? {})))
 
 		this.overrides = {
 			Route: {
@@ -109,10 +108,10 @@ export class JDF2GTFS {
 			feed_publisher_name: "IsItHere",
 			feed_puiblisher_url: "https://isithere.sk",
 			feed_lang: "sk",
-			feed_start_date: "",
-			feed_end_date: "e.feed_end_date",
-			feed_contact_email: "e.feed_contact_email",
-			feed_contact_url: "e.feed_contact_url"
+			feed_start_date: "2024-12-15",
+			feed_end_date: "2025-12-13",
+			feed_contact_email: "ahoj@isithere.sk",
+			feed_contact_url: "https://isithere.sk"
 		}
 
 		this._loadedFiles = new Map()
@@ -153,7 +152,7 @@ export class JDF2GTFS {
 	async makeAgencies() {
 		const Agencies = await import("./Library/core@agencies/index")
 		let generated = await Agencies.default(this)
-		this._entities.set("agencies", generated)
+		this._entities.set("agency", generated)
 		return generated
 	}
 
@@ -214,6 +213,24 @@ export class JDF2GTFS {
 
 		this._entities.set("feed_info", new Map([["0", feed_info]]))
 		return [ feed_info ]
+	}
+
+	async makeAll() {
+		await this.loadFiles()
+		await this.makeAgencies()
+		await this.makeStops()
+		await this.makeRoutes()
+		await this.makeTrips()
+		await this.makeStopTimes()
+		await this.makeCalendars()
+		await this.makeCalendarDates()
+		await this.makeFeedInfo()
+
+		return await this.zipEntities()
+	}
+
+	async zipEntities() {
+		return await FileProvider.createZip(this._entities)
 	}
 
     // async make() {

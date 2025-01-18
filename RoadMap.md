@@ -22,8 +22,8 @@
 
 ## Stops
 - [ ] use `Oznacniky` for automatic detection of Platforms and asign them found Coordinates
-- [ ] fix platform generation
-- [ ] Platform `stop_name` generation should follow best practises set by the Standard
+- [x] fix platform generation
+- [x] Platform `stop_name` generation should follow best practises set by the Standard
 - [ ] allow for on-the-fly generation of non-stop/non-platform entities
 - [x] **fix stop generation**
 

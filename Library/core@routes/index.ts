@@ -31,6 +31,8 @@ export default async function runtime(config: JDF2GTFS) {
 			foregroundColor: lineColors.get(_.number)?.foreground ?? lineColors.get("default")?.foreground
 		})
 
+		console.log(computedRoute.backgroundColor, lineColors.get(_.number)?.background, lineColors.get("default")?.background)
+
 		let requestEntityChanges = config.requestEntityChanges?.Routes({ gtfs: computedRoute, jdf: _ })
 		if (requestEntityChanges)
 			computedRoute = Object.assign(computedRoute, requestEntityChanges)

@@ -1,0 +1,1 @@
+export type GTFSEntities = "stops" | "agency" | "routes" | "trips" | "stop_times" | "calendar" | "calendar_dates" | "feed_info"
