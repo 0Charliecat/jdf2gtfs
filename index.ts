@@ -32,6 +32,10 @@ export class JDF2GTFS {
 		}
 	}
 
+	featureFlags: {
+		useExtendedRouteTypes: boolean
+	}
+
 	private _loadedFiles: Map<JDFFileName|String, Buffer>
 	private _entities: Map<GTFSEntities, Map<string, any>>
 
@@ -92,6 +96,11 @@ export class JDF2GTFS {
 				Type: new Map(Object.entries(e.overrides?.Route?.Type ?? {}))
 			}
 		}
+
+		this.featureFlags = Object.assign(
+			{ useExtendedRouteTypes: false }, 
+			e.featureFlags ?? {}
+		)
         // this.line_number_changes = Object.assign({}, e.line_number_changes)
         // this.line_colors = Object.assign({}, e.line_colors)
         // this.line_network = Object.assign({}, e.line_network);
@@ -207,7 +216,7 @@ export class JDF2GTFS {
 			end: new Date(this.feed_info.feed_end_date!),
 			version: this.feed_info.feed_version,
 			contactEmail: this.feed_info.feed_contact_email,
-			contactUrl: this.feed_info.feed_contact_url
+			contactUrl: this.feed_info.feed_contact_url,
 			// TODO: Finish this generator
 		})
 

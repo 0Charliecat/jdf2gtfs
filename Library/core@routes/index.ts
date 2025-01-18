@@ -1,9 +1,9 @@
 import path from "path";
 import { JDF2GTFS } from "../.."
 import { getContentsArray } from "../_app/_reusables/getContentsArray";
-import { Route, RouteVehicleType } from '@isithere/gtfs'
+import { Route, RouteVehicleType, RouteVehicleTypeExtended } from '@isithere/gtfs'
 import { BooleanyValue } from "../_app/_types/BooleanyValue";
-import { DopravnyProstriedok, Linky, headers } from "../@isithere/jdf_types/Linky";
+import { DopravnyProstriedok, Linky, TypLinky, headers } from "../@isithere/jdf_types/Linky";
 import { LinExt, headers as linextHeaders } from "../@isithere/jdf_types/LinExt";
 import { getAgencyID } from "../core@agencies";
 
@@ -26,7 +26,9 @@ export default async function runtime(config: JDF2GTFS) {
 			agency: getAgencyID(id_prefix, _.agencyID, _.agencyResolution),
 			shortName: (config.overrides.Route.ShortName.get(_.number)) ?? (_ext?.preference ? _ext.routeShortName : _.number),
 			longName: _.name,
-			type: config.overrides.Route.Type.get(_.number) ?? _GetGTFSRouteType(_.vehicleType),
+			type: 
+				config.overrides.Route.Type.get(_.number) ?? 
+				( config.featureFlags.useExtendedRouteTypes ? _GetGTFSRouteTypeFromLinExt(_.routingType, _.vehicleType) : _GetGTFSRouteType(_.vehicleType)),
 			backgroundColor: lineColors.get(_.number)?.background ?? lineColors.get("default")?.background,
 			foregroundColor: lineColors.get(_.number)?.foreground ?? lineColors.get("default")?.foreground
 		})
@@ -63,4 +65,36 @@ function _GetGTFSRouteType(type: DopravnyProstriedok) {
 		default:
 			return null
 	}
+}
+
+function _GetGTFSRouteTypeFromLinExt(routingType: TypLinky, vehicleType: DopravnyProstriedok) {
+	if (vehicleType === DopravnyProstriedok.Trolleybus)
+		return RouteVehicleTypeExtended.TrolleybusService
+	else if (vehicleType === DopravnyProstriedok.Tram)
+		return RouteVehicleTypeExtended.TramService
+	else if (vehicleType === DopravnyProstriedok.Metro)
+		return RouteVehicleTypeExtended.Underground
+	else if (vehicleType === DopravnyProstriedok.CableCar)
+		return RouteVehicleTypeExtended.FunicularServices
+	else if (vehicleType === DopravnyProstriedok.Ferry)
+		return RouteVehicleTypeExtended.WaterTransportService
+	else if (vehicleType === DopravnyProstriedok.Bus) {
+		switch (routingType) {
+			case TypLinky.Urban:
+				return RouteVehicleTypeExtended.BusService
+			case TypLinky.UrbanWithSuburbanService:
+				return RouteVehicleTypeExtended.RegionalBus
+			case TypLinky.NationalWithinRegion:
+				return RouteVehicleTypeExtended.RegionalBus
+			case TypLinky.NationalBetweenRegions:
+				return RouteVehicleTypeExtended.RegionalCoach
+			case TypLinky.NationalLongDistance:
+				return RouteVehicleTypeExtended.NationalCoach
+			case TypLinky.InternationalWithoutNationalService:
+				return RouteVehicleTypeExtended.InternationalCoach
+			case TypLinky.InternationalWithNationalService:
+				return RouteVehicleTypeExtended.InternationalCoach
+		}
+	}
+		
 }

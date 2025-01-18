@@ -28,7 +28,7 @@
 - [x] **fix stop generation**
 
 ## Routes
-- [ ] allow for predetermined route_short_name change using a config
+- [x] allow for predetermined route_short_name change using a config
 - [ ] allow for optional setting of Extended GTFS Route types (see https://developers.google.com/transit/gtfs/reference/extended-route-types)
 - [ ] allow to generate `AltLinky` properties if wished by the feed consumer
 - [x] **fix colors**
