@@ -133,3 +133,6 @@ dist
 .temp
 .DS_Store
 lib/*
+
+testing.*
+RoadMap.md

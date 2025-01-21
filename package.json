@@ -1,38 +1,35 @@
 {
-  "dependencies": {
-    "@isithere/gtfs": "1.1.0-next-04",
-    "adm-zip": "^0.5.16",
-    "csvtojson": "^2.0.10",
-    "iconv-lite": "^0.6.3",
-    "json-2-csv": "^4.1.1",
-    "slovak-holidays": "^1.0.1",
-    "typescript": "^5.7.2"
-  },
-  "name": "jdf2gtfs",
-  "description": "a nodejs script and dependency to convert Czechoslovak JDF timetable format to GTFS",
-  "version": "1.0.1",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/0Charliecat/jdf2gtfs.git"
-  },
-  "keywords": [
-    "jdf",
-    "gfts"
-  ],
-  "author": "charliecat",
-  "bugs": {
-    "url": "https://github.com/0Charliecat/jdf2gtfs/issues"
-  },
-  "homepage": "https://github.com/0Charliecat/jdf2gtfs#readme",
-  "devDependencies": {
-    "@types/adm-zip": "^0.5.7",
-    "@types/node": "^22.10.5"
-  }
+	"name": "jdf2gtfs",
+	"description": "a nodejs script and dependency to convert Czechoslovak JDF timetable format to GTFS",
+	"version": "2.0.0-next-01",
+	"main": "index.js",
+	"dependencies": {
+		"@isithere/gtfs": "~next",
+		"adm-zip": "^0.5.16",
+		"csvtojson": "^2.0.10",
+		"iconv-lite": "^0.6.3",
+		"json-2-csv": "^4.1.1",
+		"slovak-holidays": "^1.0.1"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"prepublish": "bun build index.ts --outdir=. --sourcemap=external --packages=external --minify"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0Charliecat/jdf2gtfs.git"
+	},
+	"keywords": [
+		"jdf",
+		"gfts"
+	],
+	"author": "charliecat",
+	"bugs": {
+		"url": "https://github.com/0Charliecat/jdf2gtfs/issues"
+	},
+	"homepage": "https://github.com/0Charliecat/jdf2gtfs#readme",
+	"devDependencies": {
+		"@types/adm-zip": "^0.5.7",
+		"@types/node": "^22.10.5"
+	}
 }
