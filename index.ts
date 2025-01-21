@@ -6,6 +6,7 @@ import { RequestGTFSEntityChanges } from "./Library/_app/_types/RequestEntityCha
 import { CustomPlatform } from "./Library/_app/_types/CustomPlatform";
 import { SetupPevnyKod } from "./Library/core@pevnykod";
 import { GTFSEntities } from "./Library/_app/_types/GTFSEntities";
+import { Configuration, GeneratorOverrides, GeneratorOverridesMap } from "./Library/_app/_types/ConverterConfiguration";
 
 export class JDF2GTFS {
 
@@ -20,17 +21,12 @@ export class JDF2GTFS {
 	stop_ids: Map<string, string>;
 	stop_codes: Map<string, string>;
 	timezone: Timezone;
-	lang: LanguageCode;
+	// lang: LanguageCode;
 
 	lineNumberChanges: Map<string, string>;
 	stops: Map<string, Stop>;
 
-	overrides: {
-		Route: {
-			ShortName: Map<string, string>,
-			Type: Map<string, RouteVehicleType | RouteVehicleTypeExtended>
-		}
-	}
+	overrides: GeneratorOverridesMap
 
 	featureFlags: {
 		useExtendedRouteTypes: boolean
@@ -39,38 +35,13 @@ export class JDF2GTFS {
 	private _loadedFiles: Map<JDFFileName|String, Buffer>
 	private _entities: Map<GTFSEntities, Map<string, any>>
 
-    constructor(e) {
-        /*let config = {
-            path: "/workspaces/jdf2gtfs/.temp/tdtrencin11102022",
-            output: "/workspaces/jdf2gtfs/.temp/gtfs",
-            stop_ids: {
-                "5000501": "gensvobodu"
-            },
-            id_prefix: "TDTRENCIN:",
-            locations: {},
-            stop_codes: {},
-            platforms: [{
-                parent: "5000501",
-                code: "A",
-                location: [48.8748300, 18.0489801]
-            }],
-            timezone: "Europe/Bratislava",
-            lang: "sk",
-            line_number_changes: {},
-            line_colors: {},
-            line_network: {},
-            stops: [],
-            stop_times_headsigns: {},
-            years: [2022],
-            line_route_type_override: {}
-        };*/
-        let now = new Date()
+	constructor(config: Configuration) {
+		let e = config
 
-        // this.output = e.output || path.join(this.path, "gfts")
-		this.fileProvider = e.fileProvider
+		this.fileProvider = e.fileProvider!
 		this.requestEntityChanges = Object.assign(
 			{
-				Stops: ({ gtfs, jdf }) => false,
+				Stops: (value /*{ gtfs, jdf, platform }*/) => false,
 				Agencies: ({ gtfs, jdf }) => false,
 				Routes: ({ gtfs, jdf }) => false,
 				Trips: ({ gtfs, jdf }) => false,
@@ -78,17 +49,19 @@ export class JDF2GTFS {
 				Calendars: ({ gtfs, jdf }) => false,
 				CalendarDates: ({ gtfs, jdf }) => false
 			},
-			e.requestEntityChanges
+			e.requestEntityChanges ?? {}
 		)
-        this.stop_ids = new Map(Object.entries(e.stop_ids ?? {}))
-        this.id_prefix = e.id_prefix || ""
-        this.locations = new Map(Object.entries(e.locations ?? {}))
-        this.platforms = [].concat(e.platforms)
-        this.timezone = e.timezone || "Europe/Bratislava"
-        this.lang = e.lang || "sk"
+		this.stop_ids = new Map(Object.entries(e.stop_ids ?? {}))
+		this.id_prefix = e.id_prefix || ""
+		this.locations = new Map(Object.entries(e.locations ?? {}))
+		this.platforms = [ ...(e.platforms ?? []) ]
+		this.timezone = e.timezone || "Europe/Bratislava"
 		this.stop_codes = new Map(Object.entries(e.stop_codes ?? {}))
 
-		this.lineColors = new Map(Object.entries(Object.assign({ default: { background: "ffffff", foreground: "000000" }}, e.lineColors ?? {})))
+		this.lineColors = new Map(Object.entries(Object.assign(
+			{ default: { background: "ffffff", foreground: "000000" } }, 
+			e.lineColors ?? {}
+		)))
 
 		this.overrides = {
 			Route: {
@@ -113,15 +86,26 @@ export class JDF2GTFS {
         // this.feed_contact_email = e.feed_contact_email || ""
         // this.feed_contact_url = e.feed_contact_url || ""
 
-		this.feed_info = {
-			feed_publisher_name: "IsItHere",
-			feed_puiblisher_url: "https://isithere.sk",
-			feed_lang: "sk",
-			feed_start_date: "2024-12-15",
-			feed_end_date: "2025-12-13",
-			feed_contact_email: "ahoj@isithere.sk",
-			feed_contact_url: "https://isithere.sk"
-		}
+		this.feed_info = e.feed_info ? 
+			Object.assign(
+				{
+
+					feed_publisher_name: "", feed_puiblisher_url: "", feed_lang: "",
+					feed_start_date: "", feed_end_date: "", feed_contact_email: "",
+					feed_contact_url: ""
+				},
+				e.feed_info
+			) : 
+			{
+
+				feed_publisher_name: "IsItHere",
+				feed_puiblisher_url: "https://isithere.sk",
+				feed_lang: "sk",
+				feed_start_date: "2024-12-15",
+				feed_end_date: "2025-12-13",
+				feed_contact_email: "ahoj@isithere.sk",
+				feed_contact_url: "https://isithere.sk"
+			}
 
 		this._loadedFiles = new Map()
 		this._entities = new Map()

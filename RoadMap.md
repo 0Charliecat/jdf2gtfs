@@ -1,7 +1,7 @@
 # Package RoadMap
 
 ## General
-- [ ] allow for Entity Added Data Request (calls a function which allows to edit entity data when being generated)
+- [x] allow for Entity Added Data Request (calls a function which allows to edit entity data when being generated)
 - [ ] Tariff zones support
 - [ ] allow to add ungeneratable fields/files on fly (i.e. GTFS Fares)
 - [ ] allow to generate data from `Mistenky`
@@ -29,7 +29,7 @@
 
 ## Routes
 - [x] allow for predetermined route_short_name change using a config
-- [ ] allow for optional setting of Extended GTFS Route types (see https://developers.google.com/transit/gtfs/reference/extended-route-types)
+- [x] allow for optional setting of Extended GTFS Route types (see https://developers.google.com/transit/gtfs/reference/extended-route-types)
 - [ ] allow to generate `AltLinky` properties if wished by the feed consumer
 - [x] **fix colors**
 
