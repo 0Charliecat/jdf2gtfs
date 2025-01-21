@@ -31,19 +31,19 @@ importers:
         specifier: ^0.5.7
         version: 0.5.7
       '@types/node':
-        specifier: ^22.10.5
-        version: 22.10.5
+        specifier: ^22.10.7
+        version: 22.10.7
 
 packages:
 
-  '@isithere/gtfs@1.1.0-next-02':
-    resolution: {integrity: sha512-cVqyHMD72Ef7z+ANcWs+6CD5xZAhBI/Jwu1C5q029ah2PUKGSdGVkESBS0ymD2dAbjiJg0nRAfQvv1r8zNRuLQ==}
+  '@isithere/gtfs@1.1.0-next-04':
+    resolution: {integrity: sha512-XojJe9seW5JWZ8J5/Sv04wM0nTIM/sSxb5xz0aRwds3wDeSXTJqWg+YN43o2s5cgE+KNgh75pzT1fqxiIKDkmg==}
 
   '@types/adm-zip@0.5.7':
     resolution: {integrity: sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==}
 
-  '@types/node@22.10.5':
-    resolution: {integrity: sha512-F8Q+SeGimwOo86fiovQh8qiXfFEh2/ocYv7tU5pJ3EXMSSxk1Joj5wefpFK2fHTf/N6HKGSxIDBT9f3gCxXPkQ==}
+  '@types/node@22.10.7':
+    resolution: {integrity: sha512-V09KvXxFiutGp6B7XkpaDXlNadZxrzajcY50EuoLIpQ6WWYCSvf19lVIazzfIzQvhUN2HjX12spLojTnhuKlGg==}
 
   adm-zip@0.5.16:
     resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
@@ -102,16 +102,16 @@ packages:
 
 snapshots:
 
-  '@isithere/gtfs@1.1.0-next-02':
+  '@isithere/gtfs@1.1.0-next-04':
     dependencies:
       timezone-enum: 1.0.4
       typescript: 5.7.3
 
   '@types/adm-zip@0.5.7':
     dependencies:
-      '@types/node': 22.10.5
+      '@types/node': 22.10.7
 
-  '@types/node@22.10.5':
+  '@types/node@22.10.7':
     dependencies:
       undici-types: 6.20.0
 
