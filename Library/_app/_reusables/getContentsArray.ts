@@ -1,4 +1,4 @@
-import csv from "csvtojson"
+import neatCsv from 'neat-csv';
 import iconv from "iconv-lite"
 
 export async function getContentsArray(_file: Buffer, _headers: string[]) {
@@ -7,9 +7,9 @@ export async function getContentsArray(_file: Buffer, _headers: string[]) {
 		'windows-1250'
 	)
 
-	return await csv().fromString(
+	return await neatCsv(
 		_headers.join(',') +
 		"\r\n" +
 		_fileUTF8String.replaceAll('";', '"')
-	)
+	) as any[]
 }

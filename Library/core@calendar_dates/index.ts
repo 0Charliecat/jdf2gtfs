@@ -7,6 +7,7 @@ import { CasKodTyp, CasKody, headers as casKodyHeaders } from '../@isithere/jdf_
 import { pkArray } from "../core@pevnykod";
 import { PevnyKodEnum, PevnyKodTripExecution } from "../core@pevnykod/types";
 import { isHoliday } from "slovak-holidays";
+import { dateConverter } from "../_app/_reusables/dateConverter";
 
 export default async function runtime(config: JDF2GTFS) {
 	const { id_prefix } = config
@@ -111,13 +112,6 @@ export default async function runtime(config: JDF2GTFS) {
 	}
 
 	return Entities
-}
-
-function dateConverter(ddmmyyyy: string) {
-	let yyyy = ddmmyyyy.substring(4, 8)
-	let mm = ddmmyyyy.substring(2, 4)
-	let dd = ddmmyyyy.substring(0, 2)
-	return (new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd), 0, 0, 0))
 }
 
 function getDaysArray(start: Date, end: Date) {

@@ -3,6 +3,7 @@ import { LongitudeLatitude, Timezone, LanguageCode, HexCodeColor, Year } from ".
 import { JDFFileProvider } from "../../lib@FileProvider/_types/FileProviderTypes";
 import { CustomPlatform } from "./CustomPlatform";
 import { RequestGTFSEntityChanges } from "./RequestEntityChanges";
+import { FeatureFlags } from "./FeatureFlags";
 
 export interface Configuration {
 	fileProvider: Required<JDFFileProvider>
@@ -14,7 +15,7 @@ export interface Configuration {
 		[key: string]: { background: HexCodeColor; foreground: HexCodeColor }, 
 		default: { background: HexCodeColor; foreground: HexCodeColor } 
 	};
-	feed_info?: GTFSFeedInfoObject;
+	feed_info?: Partial<GTFSFeedInfoObject>;
 		
 	stop_ids?: { [key: string]: string };
 	stop_codes?: { [key: string]: string };
@@ -25,9 +26,7 @@ export interface Configuration {
 	
 	overrides?: Partial<GeneratorOverrides>
 	
-	featureFlags?: {
-		useExtendedRouteTypes?: boolean
-	}
+	featureFlags?: Partial<FeatureFlags>
 }
 
 

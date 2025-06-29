@@ -84,10 +84,10 @@ export interface LinExt {
 }
 
 export const headers = [
-	"number",
+	"lineNumber",
 	"order",
 	"transportCode",
 	"routeShortName",
-	"reserved1",
 	"preference",
+	"reserved1",
 ]

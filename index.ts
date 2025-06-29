@@ -7,6 +7,7 @@ import { CustomPlatform } from "./Library/_app/_types/CustomPlatform";
 import { SetupPevnyKod } from "./Library/core@pevnykod";
 import { GTFSEntities } from "./Library/_app/_types/GTFSEntities";
 import { Configuration, GeneratorOverrides, GeneratorOverridesMap } from "./Library/_app/_types/ConverterConfiguration";
+import { FeatureFlags } from "./Library/_app/_types/FeatureFlags";
 
 export class JDF2GTFS {
 
@@ -21,16 +22,13 @@ export class JDF2GTFS {
 	stop_ids: Map<string, string>;
 	stop_codes: Map<string, string>;
 	timezone: Timezone;
-	// lang: LanguageCode;
 
 	lineNumberChanges: Map<string, string>;
 	stops: Map<string, Stop>;
 
 	overrides: GeneratorOverridesMap
 
-	featureFlags: {
-		useExtendedRouteTypes: boolean
-	}
+	featureFlags: FeatureFlags
 
 	private _loadedFiles: Map<JDFFileName|String, Buffer>
 	private _entities: Map<GTFSEntities, Map<string, any>>
@@ -41,18 +39,18 @@ export class JDF2GTFS {
 		this.fileProvider = e.fileProvider!
 		this.requestEntityChanges = Object.assign(
 			{
-				Stops: (value /*{ gtfs, jdf, platform }*/) => false,
-				Agencies: ({ gtfs, jdf }) => false,
-				Routes: ({ gtfs, jdf }) => false,
-				Trips: ({ gtfs, jdf }) => false,
-				StopTimes: ({ gtfs, jdf }) => false,
-				Calendars: ({ gtfs, jdf }) => false,
-				CalendarDates: ({ gtfs, jdf }) => false
+				Stops: returnFalse,			// (value /*{ gtfs, jdf, platform }*/) => false,
+				Agencies: returnFalse,		// ({ gtfs, jdf }) => false,
+				Routes: returnFalse,		// ({ gtfs, jdf }) => false,
+				Trips: returnFalse,			// ({ gtfs, jdf }) => false,
+				StopTimes: returnFalse,		// ({ gtfs, jdf }) => false,
+				Calendars: returnFalse,		// ({ gtfs, jdf }) => false,
+				CalendarDates: returnFalse,	// ({ gtfs, jdf }) => false
 			},
 			e.requestEntityChanges ?? {}
 		)
 		this.stop_ids = new Map(Object.entries(e.stop_ids ?? {}))
-		this.id_prefix = e.id_prefix || ""
+		this.id_prefix = e.id_prefix ?? ""
 		this.locations = new Map(Object.entries(e.locations ?? {}))
 		this.platforms = [ ...(e.platforms ?? []) ]
 		this.timezone = e.timezone || "Europe/Bratislava"
@@ -71,7 +69,13 @@ export class JDF2GTFS {
 		}
 
 		this.featureFlags = Object.assign(
-			{ useExtendedRouteTypes: false }, 
+			{
+				useExtendedRouteTypes: false,
+				ignoreCisloSpojeForDirection: false,
+				useVerzeJDFIDAsFeedVersion: false,
+				useTTValitityAsFeedValidity: false,
+				generateInSeatTransfersFromCaskody: false
+			}, 
 			e.featureFlags ?? {}
 		)
         // this.line_number_changes = Object.assign({}, e.line_number_changes)
@@ -92,19 +96,19 @@ export class JDF2GTFS {
 
 					feed_publisher_name: "", feed_puiblisher_url: "", feed_lang: "",
 					feed_start_date: "", feed_end_date: "", feed_contact_email: "",
-					feed_contact_url: ""
+					feed_contact_url: "", feed_version: ""
 				},
 				e.feed_info
 			) : 
 			{
 
-				feed_publisher_name: "IsItHere",
-				feed_puiblisher_url: "https://isithere.sk",
+				feed_publisher_name: "A generator instance of jdf2gtfs",
+				feed_puiblisher_url: "https://iih.icu/dx-jdf2gtfs",
 				feed_lang: "sk",
-				feed_start_date: "2024-12-15",
-				feed_end_date: "2025-12-13",
-				feed_contact_email: "ahoj@isithere.sk",
-				feed_contact_url: "https://isithere.sk"
+				feed_start_date: "",
+				feed_end_date: "",
+				feed_contact_email: "",
+				feed_contact_url: ""
 			}
 
 		this._loadedFiles = new Map()
@@ -139,7 +143,7 @@ export class JDF2GTFS {
 	}
 
 	getStop(id: string) {
-		return this._entities.get("stops")!.get(id) as Stop
+		return this._entities.get("stops")!.get(id) as (Stop | null)
 	}
 
 	async makeAgencies() {
@@ -192,20 +196,10 @@ export class JDF2GTFS {
 	}
 
 	async makeFeedInfo() {
-		const feed_info = new FeedInfo({
-			publisherName: this.feed_info.feed_publisher_name,
-			publisherUrl: this.feed_info.feed_puiblisher_url,
-			lang: this.feed_info.feed_lang,
-			start: new Date(this.feed_info.feed_start_date!),
-			end: new Date(this.feed_info.feed_end_date!),
-			version: this.feed_info.feed_version,
-			contactEmail: this.feed_info.feed_contact_email,
-			contactUrl: this.feed_info.feed_contact_url,
-			// TODO: Finish this generator
-		})
-
-		this._entities.set("feed_info", new Map([["0", feed_info]]))
-		return [ feed_info ]
+		const FeedInfo = await import("./Library/core@feed_info/index")
+		let generated = await FeedInfo.default(this)
+		this._entities.set("feed_info", new Map([["0", generated]]))
+		return [ generated ]
 	}
 
 	async makeAll() {
@@ -258,6 +252,10 @@ export class JDF2GTFS {
     //     fs.writeFileSync(path.join(this.output, "feed_info.txt"), FeedInfoCSV)
     // }
 
+}
+
+function returnFalse(value: any) {
+	return false
 }
 
 // exports = module.exports = JDF2GTFS

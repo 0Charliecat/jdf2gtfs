@@ -13,14 +13,14 @@ export default async function runtime(config: JDF2GTFS) {
 	let Entities: Map<string, Stop> = new Map()
 
 	for (let _ of _Zastavky) {
-		let location = locations.get(_.stopID)
+		let location = locations.get(_.stopID) ?? [0,0]
 
 		let computedStop = new Stop({
 			id: id_prefix+_.stopID,
 			name: _StationNameConstructor(_),
 			code: stop_codes.get(_.stopID) ?? undefined,
-			latitude: (location ?? [0,0])[1],
-			longitude: (location ?? [0,0])[0],
+			latitude: location[1],
+			longitude: location[0],
 			locationType: StopLocationType.Station
 		})
 
@@ -54,7 +54,7 @@ export default async function runtime(config: JDF2GTFS) {
 
 /**
  * Constructing force for Stop Names
- * @returns {String} i.e. Bratislava, Vajnory, MiÚ Vajnory
+ * @returns {string} i.e. Bratislava, Vajnory, MiÚ Vajnory
  */
 function _StationNameConstructor(stop: Zastavky) {
 	let resultingName = [ stop.localityName, stop.localityPart, stop.nearPlace ]

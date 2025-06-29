@@ -140,3 +140,7 @@ testing.js
 ## Build Fragment
 index.js
 index.js.map
+
+## Development Fragment
+testing.ams.ts
+testing.nitra.ts
