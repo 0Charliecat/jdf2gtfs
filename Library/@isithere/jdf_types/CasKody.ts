@@ -67,11 +67,11 @@ export interface CasKody {
 
 	exceptionType: CasKodTyp
 
-	dateFrom: DDMMYYYY
+	dateFrom?: DDMMYYYY
 
-	dateUntil: DDMMYYYY
+	dateUntil?: DDMMYYYY
 
-	note: String
+	note?: string
 
 	lineResolution: number
 }
