@@ -89,5 +89,5 @@ export interface PevnyKod {
 export const headers = [
 	"key",
 	"value",
-	"reserved"
+	"reserved1"
 ]
