@@ -6,7 +6,7 @@ export type LongitudeLatitude = [ number, number ]
 
 export type Timezone = string
 export type HexCodeColor = string
-export type Year = Number
+export type Year = number
 
 export type LinkaCislo = string
 
