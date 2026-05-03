@@ -1,8 +1,21 @@
 {
 	"name": "jdf2gtfs",
 	"description": "a nodejs script and dependency to convert Czechoslovak JDF timetable format to GTFS",
-	"version": "2.0.0-next-03",
+	"version": "2.0.0",
 	"main": "index.js",
+	"types": "index.d.ts",
+	"exports": {
+		".": {
+			"types": "./index.d.ts",
+			"default": "./index.js"
+		}
+	},
+	"files": [
+		"index.js",
+		"index.js.map",
+		"index.d.ts",
+		"Library/**/*.d.ts"
+	],
 	"dependencies": {
 		"@fast-csv/parse": "^5.0.2",
 		"@isithere/gtfs": "1.1.0-next-04",
@@ -13,7 +26,7 @@
 		"slovak-holidays": "^1.0.1"
 	},
 	"scripts": {
-		"prepublish": "bun build index.ts --outdir=. --sourcemap=external --packages=external --minify"
+		"prepublish": "find . -maxdepth 6 -name '*.d.ts' -not -path './node_modules/*' -delete && bun build index.ts --outdir=. --sourcemap=external --packages=external --minify && node_modules/.pnpm/node_modules/.bin/tsc --project tsconfig.json"
 	},
 	"repository": {
 		"type": "git",
@@ -21,7 +34,7 @@
 	},
 	"keywords": [
 		"jdf",
-		"gfts"
+		"gtfs"
 	],
 	"author": "charliecat",
 	"bugs": {
@@ -30,6 +43,7 @@
 	"homepage": "https://github.com/0Charliecat/jdf2gtfs#readme",
 	"devDependencies": {
 		"@types/adm-zip": "^0.5.7",
-		"@types/node": "^22.10.7"
+		"@types/node": "^22.10.7",
+		"typescript": "^5.7.3"
 	}
 }

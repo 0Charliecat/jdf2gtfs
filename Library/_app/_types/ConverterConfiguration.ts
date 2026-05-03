@@ -27,6 +27,7 @@ export interface Configuration {
 	overrides?: Partial<GeneratorOverrides>
 	
 	featureFlags?: Partial<FeatureFlags>
+	parentStops?: string[]
 }
 
 

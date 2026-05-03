@@ -1,4 +1,4 @@
-import { Agency, FeedInfo, GTFSFeedInfoObject, RouteVehicleType, RouteVehicleTypeExtended, Stop } from "@isithere/gtfs"
+import { Agency, Calendar, FeedInfo, GTFSFeedInfoObject, RouteVehicleType, RouteVehicleTypeExtended, Stop } from "@isithere/gtfs"
 import { HexCodeColor, LanguageCode, LongitudeLatitude, Timezone, Year } from "./Library/_app/_types/Simples"
 import { JDFFileName, JDFFileProvider } from "./Library/lib@FileProvider/_types/FileProviderTypes";
 import FileProvider from "./Library/lib@FileProvider/FileProvider";
@@ -23,8 +23,9 @@ export class JDF2GTFS {
 	stop_codes: Map<string, string>;
 	timezone: Timezone;
 
-	lineNumberChanges: Map<string, string>;
-	stops: Map<string, Stop>;
+	parentStops: string[]
+	stopNames: Map<string, string>
+	blockIds: Map<string, string>
 
 	overrides: GeneratorOverridesMap
 
@@ -74,7 +75,9 @@ export class JDF2GTFS {
 				ignoreCisloSpojeForDirection: false,
 				useVerzeJDFIDAsFeedVersion: false,
 				useTTValitityAsFeedValidity: false,
-				generateInSeatTransfersFromCaskody: false
+				generateInSeatTransfersFromCaskody: false,
+				useParentStopNameForPlatforms: false,
+				showCISCPCodeInStopCode: false
 			}, 
 			e.featureFlags ?? {}
 		)
@@ -103,7 +106,7 @@ export class JDF2GTFS {
 			{
 
 				feed_publisher_name: "A generator instance of jdf2gtfs",
-				feed_puiblisher_url: "https://iih.icu/dx-jdf2gtfs",
+				feed_puiblisher_url: "https://github.com/0Charliecat/jdf2gtfs",
 				feed_lang: "sk",
 				feed_start_date: "",
 				feed_end_date: "",
@@ -113,6 +116,9 @@ export class JDF2GTFS {
 
 		this._loadedFiles = new Map()
 		this._entities = new Map()
+		this.parentStops = config.parentStops ?? []
+		this.stopNames = new Map()
+		this.blockIds = new Map()
     }
 
 	async loadFiles() {
@@ -195,6 +201,13 @@ export class JDF2GTFS {
 		return generated
 	}
 
+	// async makeTransfers() {
+	// 	const Transfers = await import("./Library/core@transfers/index")
+	// 	let generated = await Transfers.default(this)
+	// 	this._entities.set("transfers", generated)
+	// 	return generated
+	// }
+
 	async makeFeedInfo() {
 		const FeedInfo = await import("./Library/core@feed_info/index")
 		let generated = await FeedInfo.default(this)
@@ -207,6 +220,7 @@ export class JDF2GTFS {
 		await this.makeAgencies()
 		await this.makeStops()
 		await this.makeRoutes()
+		// await this.makeTransfers()  // must run before makeTrips to populate blockIds
 		await this.makeTrips()
 		await this.makeStopTimes()
 		await this.makeCalendars()
@@ -218,6 +232,23 @@ export class JDF2GTFS {
 
 	async zipEntities() {
 		return await FileProvider.createZip(this._entities)
+	}
+	
+	async softDestroyCalendar(id: string) {
+		let oldCalendar = this._entities.get("calendar")!.get(id)
+		if (!oldCalendar) return;
+		this._entities.get("calendar")!.set(id, new Calendar({
+			id: id,
+			monday: false,
+			tuesday: false,
+			wednesday: false,
+			thursday: false,
+			friday: false,
+			saturday: false,
+			sunday: false,
+			start: oldCalendar.start,
+			end: oldCalendar.end
+		}))
 	}
 
     // async make() {

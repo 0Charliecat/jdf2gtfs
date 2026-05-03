@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"outDir": ".",
+		"rootDir": ".",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"target": "ESNext",
+		"skipLibCheck": true,
+		"strict": false
+	},
+	"include": ["index.ts", "Library/**/*.ts"],
+	"exclude": ["node_modules", "testing.*", "**/*.d.ts", "**/*.js"]
+}

@@ -1,4 +1,3 @@
-import path from "path";
 import { JDF2GTFS } from "../.."
 import { getContentsArray } from "../_app/_reusables/getContentsArray";
 import { Route, RouteVehicleType, RouteVehicleTypeExtended } from '@isithere/gtfs'
@@ -6,6 +5,7 @@ import { BooleanyValue } from "../_app/_types/BooleanyValue";
 import { DopravnyProstriedok, Linky, TypLinky, headers } from "../@isithere/jdf_types/Linky";
 import { LinExt, headers as linextHeaders } from "../@isithere/jdf_types/LinExt";
 import { getAgencyID } from "../core@agencies";
+import { Udaje, headers as udajeHeaders } from "../@isithere/jdf_types/Udaje";
 
 export default async function runtime(config: JDF2GTFS) {
 	const { id_prefix, lineColors } = config
@@ -15,6 +15,10 @@ export default async function runtime(config: JDF2GTFS) {
 	)
 	const _LinExt: LinExt[] = config.getFile("linext") 
 		? await getContentsArray(config.getFile("linext")!, linextHeaders)
+		: []
+	
+	const _Udaje: Udaje[] = config.getFile("udaje")
+		? await getContentsArray(config.getFile("udaje")!, udajeHeaders)
 		: []
 
 	let Entities: Map<string, Route> = new Map()
@@ -30,7 +34,13 @@ export default async function runtime(config: JDF2GTFS) {
 				config.overrides.Route.Type.get(_.number) ?? 
 				(config.featureFlags.useExtendedRouteTypes ? _GetGTFSRouteTypeFromLinExt(_.routingType, _.vehicleType) : _GetGTFSRouteType(_.vehicleType)),
 			backgroundColor: lineColors.get(_.number)?.background ?? lineColors.get("default")?.background,
-			foregroundColor: lineColors.get(_.number)?.foreground ?? lineColors.get("default")?.foreground
+			foregroundColor: lineColors.get(_.number)?.foreground ?? lineColors.get("default")?.foreground,
+			description:
+				_Udaje
+					.filter(udaje => udaje.lineNumber === _.number)
+					.sort((a, b) => Number(a.rowNumber) - Number(b.rowNumber))
+					.map(udaje => `[${udaje.rowNumber}] ${udaje.text}`)
+					.join(" --- ")
 		})
 
 		if ((computedRoute.longName ?? "").startsWith(computedRoute.shortName!))

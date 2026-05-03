@@ -4,7 +4,6 @@ import { getContentsArray } from "../_app/_reusables/getContentsArray";
 import { VerzeJDF, headers } from "../@isithere/jdf_types/VerzeJDF";
 import { FeedInfo } from "@isithere/gtfs";
 import { Linky, headers as headers_Linky } from "../@isithere/jdf_types/Linky";
-import { dateToGTFS } from "@isithere/gtfs/_Univeral";
 import { dateConverter } from "../_app/_reusables/dateConverter";
 
 export default async function runtime(config: JDF2GTFS) {

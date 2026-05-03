@@ -6,9 +6,10 @@ import { Linky } from "../../@isithere/jdf_types/Linky"
 import { Spoje } from "../../@isithere/jdf_types/Spoje"
 import { Zasspoje } from "../../@isithere/jdf_types/Zasspoje"
 import { CasKody } from "../../@isithere/jdf_types/CasKody"
+import { Oznacniky } from "../../@isithere/jdf_types/Oznacniky"
 
 export interface RequestGTFSEntityChanges {
-	Stops: (value: { gtfs: Stop, jdf: Zastavky } | { gtfs: Stop, platform: CustomPlatform }) => Partial<Stop> | false
+	Stops: (value: { gtfs: Stop, jdfZastavky: Zastavky } | { gtfs: Stop, jdfOznacniky: Oznacniky } | { gtfs: Stop, platform: CustomPlatform }) => Partial<Stop> | false
 	Agencies: (value: { gtfs: Agency, jdf: Dopravci }) => Partial<Agency> | false
 	Routes: (value: { gtfs: Route, jdf: Linky }) => Partial<Route> | false
 	Trips: (value: { gtfs: Trip, jdf: Spoje }) => Partial<Trip> | false

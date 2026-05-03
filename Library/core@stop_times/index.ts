@@ -23,37 +23,36 @@ export default async function runtime(config: JDF2GTFS) {
 		let tripId = `${id_prefix}${_Zasspoje[tripNumber][0].lineNumber}r${_Zasspoje[tripNumber][0].lineResolution}_${_Zasspoje[tripNumber][0].tripNumber}`
 		let isOverMidnight = !isSortedAscending(
 			_Zasspoje[tripNumber]
-				.map(_ => _.departureTime.length != 0 ? parseInt(_.departureTime) : parseInt(_.arrivalTime))
+				.map(_ => {
+					const d = /\d{4}/.test(_.departureTime) ? parseInt(_.departureTime) : NaN
+					const a = /\d{4}/.test(_.arrivalTime)  ? parseInt(_.arrivalTime)  : NaN
+					return !isNaN(d) ? d : a
+				})
 				.filter(_ => !Number.isNaN(_))
 		)
 
 		if (isOverMidnight) {
-			let pastNormalTime = 0
-			for (let i = 1; i < _Zasspoje[tripNumber].length; i++) {
-				let _ = _Zasspoje[tripNumber][i]
-				if (!isHHMM(_.departureTime, _.arrivalTime)) {
-					pastNormalTime = i - 1
-					continue;
-				}
+			let midnightOffset = 0
+			let prevTime = -1
 
-				if (parseInt(_Zasspoje[tripNumber][pastNormalTime].departureTime) > parseInt(_.departureTime)) {
-					if (parseInt(_Zasspoje[tripNumber][pastNormalTime].departureTime) >= 2400)
-						_Zasspoje[tripNumber][i].departureTime = `${parseInt(_.departureTime) + (Math.floor(parseInt(_Zasspoje[tripNumber][pastNormalTime].departureTime) / 2400) * 2400)}`
-					else
-						_Zasspoje[tripNumber][i].departureTime = `${parseInt(_.departureTime) + 2400}`
-					if (_.arrivalTime.length > 0) {
-						_Zasspoje[tripNumber][i].arrivalTime = `${parseInt(_.arrivalTime) + ((parseInt(_Zasspoje[tripNumber][i].departureTime) / 2400) * 2400)}`
-					}
-				}
+			for (let i = 0; i < _Zasspoje[tripNumber].length; i++) {
+				const stop = _Zasspoje[tripNumber][i]
+				if (!isHHMM(stop.departureTime, stop.arrivalTime)) continue
 
-				if (parseInt(_Zasspoje[tripNumber][pastNormalTime].departureTime) > parseInt(_.arrivalTime)) {
-					if (parseInt(_Zasspoje[tripNumber][pastNormalTime].arrivalTime) >= 2400)
-						_Zasspoje[tripNumber][i].arrivalTime = `${parseInt(_.arrivalTime) + (Math.floor(parseInt(_Zasspoje[tripNumber][pastNormalTime].departureTime) / 2400) * 2400)}`
-					else
-						_Zasspoje[tripNumber][i].arrivalTime = `${parseInt(_.arrivalTime) + 2400}`
-				}
+				const rawDept = /\d{4}/.test(stop.departureTime) ? parseInt(stop.departureTime) : NaN
+				const rawArr  = /\d{4}/.test(stop.arrivalTime)  ? parseInt(stop.arrivalTime)  : NaN
 
-				pastNormalTime = i
+				// Use departure as reference for crossing detection; fall back to arrival
+				const refTime = !isNaN(rawDept) ? rawDept : rawArr
+				if (isNaN(refTime)) continue
+
+				if (prevTime >= 0 && refTime + midnightOffset < prevTime)
+					midnightOffset += 2400
+
+				if (!isNaN(rawArr))  _Zasspoje[tripNumber][i].arrivalTime   = String(rawArr  + midnightOffset)
+				if (!isNaN(rawDept)) _Zasspoje[tripNumber][i].departureTime = String(rawDept + midnightOffset)
+
+				prevTime = refTime + midnightOffset
 			}
 		}
 
@@ -93,25 +92,21 @@ function isHHMM(departureTime: string, arrivalTime: string): boolean {
 }
 
 function convertPickUpType(pk: PevnyKodEnum[]): StopTimePickDrop {
-
 	if (pk.includes(PevnyKodStopAttributes.DropOffOnly)) return StopTimePickDrop.NoStop
-	if (pk.includes(PevnyKodStopAttributes.PickUpOnly)) return StopTimePickDrop.Regular
-	if (pk.includes(PevnyKodStopAttributes.IsBorderCheck)) return StopTimePickDrop.NoStop
-	if (pk.includes(PevnyKodStopAttributes.MustArrangeWithAgency)) return StopTimePickDrop.PhoneAgency
-	if (pk.includes(PevnyKodStopAttributes.OnRequest)) return StopTimePickDrop.CoordinateDriver
-
-	return StopTimePickDrop.Regular
+	else if (pk.includes(PevnyKodStopAttributes.PickUpOnly)) return StopTimePickDrop.Regular
+	else if (pk.includes(PevnyKodStopAttributes.IsBorderCheck)) return StopTimePickDrop.NoStop
+	else if (pk.includes(PevnyKodStopAttributes.MustArrangeWithAgency)) return StopTimePickDrop.PhoneAgency
+	else if (pk.includes(PevnyKodStopAttributes.OnRequest)) return StopTimePickDrop.CoordinateDriver
+	else return StopTimePickDrop.Regular
 }
 
 function convertDropOffType(pk: PevnyKodEnum[]): StopTimePickDrop {
-
 	if (pk.includes(PevnyKodStopAttributes.PickUpOnly)) return StopTimePickDrop.NoStop
-	if (pk.includes(PevnyKodStopAttributes.DropOffOnly)) return StopTimePickDrop.Regular
-	if (pk.includes(PevnyKodStopAttributes.IsBorderCheck)) return StopTimePickDrop.NoStop
-	if (pk.includes(PevnyKodStopAttributes.MustArrangeWithAgency)) return StopTimePickDrop.PhoneAgency
-	if (pk.includes(PevnyKodStopAttributes.OnRequest)) return StopTimePickDrop.CoordinateDriver
-
-	return StopTimePickDrop.Regular
+	else if (pk.includes(PevnyKodStopAttributes.DropOffOnly)) return StopTimePickDrop.Regular
+	else if (pk.includes(PevnyKodStopAttributes.IsBorderCheck)) return StopTimePickDrop.NoStop
+	else if (pk.includes(PevnyKodStopAttributes.MustArrangeWithAgency)) return StopTimePickDrop.PhoneAgency
+	else if (pk.includes(PevnyKodStopAttributes.OnRequest)) return StopTimePickDrop.CoordinateDriver
+	else return StopTimePickDrop.Regular
 }
 
 function convertTimeFormat(hhmm: string): (string|null) {

@@ -140,6 +140,8 @@ testing.js
 ## Build Fragment
 index.js
 index.js.map
+*.d.ts
+*.d.ts.map
 
 ## Development Fragment
 testing.ams.ts

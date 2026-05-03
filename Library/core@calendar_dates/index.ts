@@ -53,11 +53,11 @@ export default async function runtime(config: JDF2GTFS) {
 				if (_c.exceptionType !== CasKodTyp.ONLY_GOES) continue
 				_calendarChanges.push({ date: dateConverter(_c.dateFrom!), exception: CalendarDateExcpetion.Added })
 				_calendarDates.push(dateConverter(_c.dateFrom!))
-
 			}
+			
+			config.softDestroyCalendar(key)
 
 			continue;
-			// TODO: add killer for the rest of the days in the calendar
 		}
 
 		let casKodJede = _casKod.filter(c => c.exceptionType === CasKodTyp.GOES)

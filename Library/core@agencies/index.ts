@@ -1,11 +1,10 @@
-import path from "path";
 import { JDF2GTFS } from "../.."
 import { getContentsArray } from "../_app/_reusables/getContentsArray";
 import { Agency } from "@isithere/gtfs";
 import { Dopravci, headers } from "../@isithere/jdf_types/Dopravci"
 
 export default async function runtime(config: JDF2GTFS) {
-	const { id_prefix, timezone, lang } = config
+	const { id_prefix, timezone } = config
 	const _Dopravci: Dopravci[] = await getContentsArray(
 		config.getFile("dopravci")!,
 		headers
@@ -19,7 +18,6 @@ export default async function runtime(config: JDF2GTFS) {
 			name: _.name,
 			url: _.website,
 			timezone,
-			lang,
 			phone: _.phoneOffice,
 			email: _.email
 		})

@@ -136,3 +136,5 @@ lib/*
 
 testing.*
 RoadMap.md
+docs/
+Library/

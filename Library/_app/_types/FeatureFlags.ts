@@ -41,4 +41,7 @@ export interface FeatureFlags {
 	 * @see Library/core@routes/index.ts:29
 	 */
 	generateInSeatTransfersFromCaskody: boolean;
+	
+	useParentStopNameForPlatforms: boolean;
+	showCISCPCodeInStopCode: boolean;
 }
