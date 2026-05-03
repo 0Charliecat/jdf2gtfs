@@ -48,6 +48,13 @@ export class Transfer {
 // Also handles Czech diacritics (pokracuje) and variations without "ako"
 const POKRACUJE_RE = /pokra[čc]uje(?:\s+ako)?\s+linka\s+(\d+)\s+do\s+zast[áa]vky\s+(.+)/i
 
+/** Convert a HHMM string (e.g. "2359", "2401") to minutes since midnight. */
+function hhmm2min(hhmm: string): number {
+	const v = parseInt(hhmm)
+	if (isNaN(v)) return NaN
+	return Math.floor(v / 100) * 60 + (v % 100)
+}
+
 export default async function runtime(config: JDF2GTFS) {
 	const { id_prefix } = config
 
@@ -93,7 +100,7 @@ export default async function runtime(config: JDF2GTFS) {
 
 		// Try to resolve the exact connecting trip by arrival time at the transfer stop
 		if (nav.lineNumberContinued && connectionZ) {
-			const deptTime = parseInt(connectionZ.departureTime || connectionZ.arrivalTime)
+			const deptMin = hhmm2min(connectionZ.departureTime || connectionZ.arrivalTime)
 			const waitMins = parseInt(nav.timeWaited) || 5
 			const linePrefix = `${nav.lineNumberContinued}_`
 
@@ -102,10 +109,10 @@ export default async function runtime(config: JDF2GTFS) {
 				const arrZ = tStops.find(z => z.stopId === nav.stopIdContinued)
 				if (!arrZ) continue
 
-				const arrTime = parseInt(arrZ.arrivalTime || arrZ.departureTime)
-				if (isNaN(deptTime) || isNaN(arrTime)) continue
+				const arrMin = hhmm2min(arrZ.arrivalTime || arrZ.departureTime)
+				if (isNaN(deptMin) || isNaN(arrMin)) continue
 				// Connecting trip must arrive within the wait window before the waiting trip departs
-				if (arrTime <= deptTime && arrTime >= deptTime - waitMins) {
+				if (arrMin <= deptMin && arrMin >= deptMin - waitMins) {
 					connectingTripId = `${id_prefix}${tStops[0].lineNumber}r${tStops[0].lineResolution}_${tStops[0].tripNumber}`
 					transferType = 1  // guaranteed timed transfer since we matched the trip
 					break
@@ -143,7 +150,7 @@ export default async function runtime(config: JDF2GTFS) {
 
 			const lastZ = fromTripStops[fromTripStops.length - 1]
 			const lastStopId = lastZ.stopId
-			const lastTime = parseInt(lastZ.departureTime || lastZ.arrivalTime)
+			const lastMin = hhmm2min(lastZ.departureTime || lastZ.arrivalTime)
 			const linePrefix = `${continuedLineNumber}_`
 
 			let matchedFirstStop: Zasspoje | undefined
@@ -152,10 +159,10 @@ export default async function runtime(config: JDF2GTFS) {
 				// Continuation trip must start at the same stop
 				if (tStops[0].stopId !== lastStopId) continue
 
-				const firstTime = parseInt(tStops[0].departureTime || tStops[0].arrivalTime)
-				if (isNaN(lastTime) || isNaN(firstTime)) continue
-				// Allow up to 2-minute gap (HHMM integer arithmetic)
-				if (Math.abs(firstTime - lastTime) <= 2) {
+				const firstMin = hhmm2min(tStops[0].departureTime || tStops[0].arrivalTime)
+				if (isNaN(lastMin) || isNaN(firstMin)) continue
+				// Allow up to 2-minute gap
+				if (Math.abs(firstMin - lastMin) <= 2) {
 					matchedFirstStop = tStops[0]
 					break
 				}

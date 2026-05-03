@@ -11,8 +11,8 @@ export default async function runtime(config: JDF2GTFS) {
 		config.getFile("zasspoje")!,
 		headers
 	)).reduce((acc, _) => {
-		if (!acc[`${_.lineNumber}_${_.tripNumber}`]) acc[`${_.lineNumber}_${_.tripNumber}`] = []
-		acc[`${_.lineNumber}_${_.tripNumber}`].push(_)
+		if (!acc[`${_.lineNumber}_${_.tripNumber}r${_.lineResolution}`]) acc[`${_.lineNumber}_${_.tripNumber}r${_.lineResolution}`] = []
+		acc[`${_.lineNumber}_${_.tripNumber}r${_.lineResolution}`].push(_)
 		return acc
 	}, {} as { [tripNumber: string]: Zasspoje[] })
 		
@@ -70,7 +70,7 @@ export default async function runtime(config: JDF2GTFS) {
 				stop: config.getStop(platformId) ? platformId : stopId,
 				departure: convertTimeFormat(_.departureTime) ?? convertTimeFormat(_.arrivalTime)!,
 				arrival: convertTimeFormat(_.arrivalTime) ?? convertTimeFormat(_.departureTime)!,
-				stopSequence: i,
+				stopSequence: i+1,
 				pickUp: convertPickUpType(_pk),
 				dropOff: convertDropOffType(_pk),
 				timepoint: 0

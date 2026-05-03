@@ -32,10 +32,10 @@ export default async function runtime(config: JDF2GTFS) {
 
 	for (let _ of _Spoje) {
 		let key = `${id_prefix}${_.lineNumber}r${_.lineResolution}_${_.tripNumber}_C`
-		let _linka = _Linky.find(l => l.number === _.lineNumber && l.lineResolution === _.lineResolution)
+		let _linka = _Linky.find(l => l.number === _.lineNumber && String(l.lineResolution) === _.lineResolution)
 		if (!_linka)
 			throw new Error(`CALENDAR | Can't find a line for trip "${key.replace('_C', '')}"`)
-		let _casKod = _CasKody.filter(c => c.lineNumber === _.lineNumber && c.lineResolution === _.lineResolution && c.tripNumber === _.tripNumber) ?? []
+		let _casKod = _CasKody.filter(c => c.lineNumber === _.lineNumber && String(c.lineResolution) === _.lineResolution && c.tripNumber === _.tripNumber) ?? []
 		
 		let _pk = pkArray([ _.pk_1, _.pk_2, _.pk_3, _.pk_4, _.pk_5, _.pk_6, _.pk_7, _.pk_8, _.pk_9, _.pk_10 ])
 		
@@ -45,18 +45,15 @@ export default async function runtime(config: JDF2GTFS) {
 
 		let casKodIsJedeJen = !!_casKod.find(c => c.exceptionType === CasKodTyp.ONLY_GOES)
 		if (casKodIsJedeJen) {
-			// In this case no interval restrictions can be used
-			// "jede jen" has only single date-specific days allowed 
-			// and cannot be combined with any other fixed code or any other CasKod Type
-			_calendarDates = []
+			// "jede jen" — trip runs only on these specific dates, no weekly pattern.
+			// Cannot be combined with any other CasKod type per spec.
 			for (let _c of _casKod) {
 				if (_c.exceptionType !== CasKodTyp.ONLY_GOES) continue
-				_calendarChanges.push({ date: dateConverter(_c.dateFrom!), exception: CalendarDateExcpetion.Added })
-				_calendarDates.push(dateConverter(_c.dateFrom!))
+				const d = dateConverter(_c.dateFrom!)
+				Entities.set(counter + "", new CalendarDate({ service: key, date: d, exception: CalendarDateExcpetion.Added }))
+				counter++
 			}
-			
-			config.softDestroyCalendar(key)
-
+			await config.softDestroyCalendar(key)
 			continue;
 		}
 
@@ -71,7 +68,8 @@ export default async function runtime(config: JDF2GTFS) {
 			let dateRange: Date[] = getDaysArray(dateConverter(_c.dateFrom!), dateConverter(_c.dateUntil!))
 				.filter(d => dateFilter(_pk, d))
 			
-			_calendarDates = _calendarDates.filter(d => dateRange.includes(d))
+			const rangeMs = new Set(dateRange.map(d => d.getTime()))
+			_calendarDates = _calendarDates.filter(d => rangeMs.has(d.getTime()))
 			_calendarChanges.push(...dateRange.map(d => ({ date: d, exception: CalendarDateExcpetion.Added })))
 		}
 
@@ -86,12 +84,14 @@ export default async function runtime(config: JDF2GTFS) {
 			// In this case no interval restrictions can be used
 			// "nejede" has only single date-specific days allowed
 			if (_c.dateUntil.length === 0) {
-				_calendarDates = _calendarDates.filter(d => d === dateConverter(_c.dateFrom!))
-				_calendarChanges.push({ date: dateConverter(_c.dateFrom!), exception: CalendarDateExcpetion.Removed })
+				const forbiddenDate = dateConverter(_c.dateFrom!)
+				_calendarDates = _calendarDates.filter(d => d.getTime() !== forbiddenDate.getTime())
+				_calendarChanges.push({ date: forbiddenDate, exception: CalendarDateExcpetion.Removed })
 			}
 			else {
 				let dateRange: Date[] = getDaysArray(dateConverter(_c.dateFrom!), dateConverter(_c.dateUntil!))
-				_calendarDates = _calendarDates.filter(d => !dateRange.includes(d))
+				const rangeMs = new Set(dateRange.map(d => d.getTime()))
+				_calendarDates = _calendarDates.filter(d => !rangeMs.has(d.getTime()))
 				_calendarChanges.push(...dateRange.map(d => ({ date: d, exception: CalendarDateExcpetion.Removed })))
 			}
 		}
@@ -123,50 +123,35 @@ function getDaysArray(start: Date, end: Date) {
     return arr;
 };
 
-// TODO: Watch if this function is correct
-function dateFilter(allowedCases: PevnyKodEnum[], date: Date) {
-	let satified = true
+// Returns true if the date falls on a day permitted by the trip's execution codes.
+// Multiple codes are OR'd — the trip runs if any code matches.
+// No execution codes means the trip runs every day in the validity range.
+function dateFilter(allowedCases: PevnyKodEnum[], date: Date): boolean {
+	const dayCodes = allowedCases.filter(
+		(c): c is PevnyKodTripExecution => Object.values(PevnyKodTripExecution).includes(c as PevnyKodTripExecution)
+	)
 
-	for (let _ of allowedCases) {
-		switch (_) {
-			case PevnyKodTripExecution.OnlyWorkdays:
-				if (!isHoliday(date)) satified = false
-				if (date.getDay() != 0 || date.getDay() != 6) satified = false
-				break;
-			case PevnyKodTripExecution.OnlyFreedays:
-				if (!isHoliday(date)) satified = false
-				if (date.getDay() !== 0) satified = false
-				break;
-			case PevnyKodTripExecution.OnlyMondays:
-				if (isHoliday(date)) satified = false
-				if (date.getDay() !== 1) satified = false
-				break;
-			case PevnyKodTripExecution.OnlyTuesdays:
-				if (isHoliday(date)) satified = false
-				if (date.getDay() !== 2) satified = false
-				break;
-			case PevnyKodTripExecution.OnlyWednesdays:
-				if (isHoliday(date)) satified = false
-				if (date.getDay() !== 3) satified = false
-				break;
-			case PevnyKodTripExecution.OnlyThursdays:
-				if (isHoliday(date)) satified = false
-				if (date.getDay() !== 4) satified = false
-				break;
-			case PevnyKodTripExecution.OnlyFridays:
-				if (isHoliday(date)) satified = false
-				if (date.getDay() !== 5) satified = false
-				break;
-			case PevnyKodTripExecution.OnlySaturdays:
-				if (isHoliday(date)) satified = false
-				if (date.getDay() !== 6) satified = false
-				break;
-			case PevnyKodTripExecution.OnlySundays:
-				if (isHoliday(date)) satified = false
-				if (date.getDay() !== 0) satified = false
-				break;
-		}
+	if (dayCodes.length === 0) return true
+
+	return dayCodes.some(code => matchesDayCode(code, date))
+}
+
+function matchesDayCode(code: PevnyKodTripExecution, date: Date): boolean {
+	const day     = date.getDay()   // 0=Sun, 1=Mon … 6=Sat
+	const holiday = !!isHoliday(date)
+	switch (code) {
+		// X — pracovní dny: Mon–Fri, excluding holidays
+		case PevnyKodTripExecution.OnlyWorkdays:   return day >= 1 && day <= 5 && !holiday
+		// + — neděle a státem uznané svátky: Sundays OR state holidays (any weekday)
+		case PevnyKodTripExecution.OnlyFreedays:   return day === 0 || holiday
+		// 1–6 — specific weekday, not on holidays (holidays shift to free-day schedule)
+		case PevnyKodTripExecution.OnlyMondays:    return day === 1 && !holiday
+		case PevnyKodTripExecution.OnlyTuesdays:   return day === 2 && !holiday
+		case PevnyKodTripExecution.OnlyWednesdays: return day === 3 && !holiday
+		case PevnyKodTripExecution.OnlyThursdays:  return day === 4 && !holiday
+		case PevnyKodTripExecution.OnlyFridays:    return day === 5 && !holiday
+		case PevnyKodTripExecution.OnlySaturdays:  return day === 6 && !holiday
+		// 7 — neděle: any Sunday (Sunday is already a free day; holiday Sundays still match)
+		case PevnyKodTripExecution.OnlySundays:    return day === 0
 	}
-
-	return satified
 }

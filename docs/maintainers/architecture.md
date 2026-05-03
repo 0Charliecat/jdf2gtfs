@@ -2,7 +2,7 @@
 
 ## What this library does
 
-`jdf2gtfs` converts **JDF** (Jízdní řád Data Format) — the Czech/Slovak public transit timetable standard — into **GTFS** (General Transit Feed Specification). JDF input is a zip of Windows-1250 encoded CSVs. GTFS output is also a zip of CSVs.
+`jdf2gtfs` converts **JDF** (JEDNOTNÝ DATOVÝ FORMÁT) — the Czech/Slovak public transit timetable standard — into **GTFS** (General Transit Feed Specification). JDF input is a zip of Windows-1250 encoded CSVs. GTFS output is also a zip of CSVs.
 
 The library is database-less and stateless between runs. A single conversion is one `JDF2GTFS` instance configured once, then run.
 
@@ -45,8 +45,6 @@ Library/
   core@transfers/                # Stub — not yet implemented
   helper@fileHeaders/            # Legacy CSV header maps (partially used)
   lib@FileProvider/              # ZIP and folder I/O abstraction
-testing.nitra.ts                 # Integration test — Nitra (Slovakia) dataset
-testing.ams.ts                   # Integration test — AMS dataset
 ```
 
 ### Module prefix conventions

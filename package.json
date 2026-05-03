@@ -4,6 +4,7 @@
 	"version": "2.0.0",
 	"main": "index.js",
 	"types": "index.d.ts",
+	"license": "SEE LICENSE IN LICENSE",
 	"exports": {
 		".": {
 			"types": "./index.d.ts",
@@ -26,7 +27,7 @@
 		"slovak-holidays": "^1.0.1"
 	},
 	"scripts": {
-		"prepublish": "find . -maxdepth 6 -name '*.d.ts' -not -path './node_modules/*' -delete && bun build index.ts --outdir=. --sourcemap=external --packages=external --minify && node_modules/.pnpm/node_modules/.bin/tsc --project tsconfig.json"
+		"prepublishOnly": "find . -maxdepth 6 -name '*.d.ts' -not -path './node_modules/*' -delete && bun build index.ts --outdir=. --sourcemap=external --packages=external --minify && tsc --project tsconfig.json"
 	},
 	"repository": {
 		"type": "git",

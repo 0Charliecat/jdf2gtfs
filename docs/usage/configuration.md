@@ -19,7 +19,7 @@ platforms: [
     {
         parent: "5000501",   // stop_id of the parent station in Zastavky.txt
         code: "A",           // platform letter/number, appended to the parent ID
-        location: [48.8748300, 18.0489801]  // [latitude, longitude], optional
+        location: [18.0489801, 48.8748300]  // [longitude, latitude], optional
     }
 ]
 ```
@@ -34,7 +34,7 @@ GPS coordinate overrides for stops, keyed by stop ID. Use this when the JDF data
 
 ```ts
 locations: {
-    "5000501": [48.8748300, 18.0489801]
+    "5000501": [18.0489801, 48.8748300]
 }
 ```
 

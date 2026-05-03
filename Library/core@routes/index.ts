@@ -104,6 +104,8 @@ function _GetGTFSRouteTypeFromLinExt(routingType: TypLinky, vehicleType: Dopravn
 				return RouteVehicleTypeExtended.InternationalCoach
 			case TypLinky.InternationalWithNationalService:
 				return RouteVehicleTypeExtended.InternationalCoach
+			default:
+				return RouteVehicleType.Bus
 		}
 	}
 		

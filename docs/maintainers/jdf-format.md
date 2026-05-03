@@ -31,9 +31,9 @@ The `getContentsArray()` helper decodes Windows-1250, parses the CSV, and return
 
 ```ts
 import getContentsArray from "../../_app/_reusables/getContentsArray"
-import { Linky } from "../../@isithere/jdf_types/Linky"
+import { Linky, headers as linkyHeaders } from "../../@isithere/jdf_types/Linky"
 
-const rows = await getContentsArray<Linky>(self.getFile("Linky.txt")!)
+const rows: Linky[] = await getContentsArray(self.getFile("linky")!, linkyHeaders)
 ```
 
 Pass the generic type parameter — it is not validated at runtime, it just gives you typed access to the fields.

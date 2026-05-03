@@ -8,7 +8,7 @@ import { dateConverter } from "../_app/_reusables/dateConverter";
 
 export default async function runtime(config: JDF2GTFS) {
 	const _VerzeJDF: VerzeJDF[] = await getContentsArray(
-		config.getFile('spoje')!,
+		config.getFile('verzejdf')!,
 		headers
 	)
 	const _Linky: Linky[] = await getContentsArray(

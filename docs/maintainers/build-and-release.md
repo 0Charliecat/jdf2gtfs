@@ -14,14 +14,9 @@ No separate compile step is needed during development — Bun runs TypeScript di
 
 ## Running the integration tests
 
-There is no automated test suite. The two test scripts serve as integration tests:
+There is no automated test suite.
 
-```bash
-bun testing.nitra.ts   # Nitra (Slovakia) dataset
-bun testing.ams.ts     # AMS dataset
-```
-
-Both call `makeAll()` and write a GTFS zip to disk. Run them after any non-trivial change and inspect the output zip with a GTFS validator.
+PLEASE TEST MANUALLY BEFORE PUBLISHING!
 
 ---
 
@@ -33,7 +28,7 @@ bun run prepublish
 bun build index.ts --outdir=. --sourcemap=external --packages=external --minify
 ```
 
-This emits `index.js` + `index.js.map` in the repo root. These are what npm consumers import. Both files are tracked in git and included in the npm package.
+This emits `index.js` + `index.js.map` in the repo root. These are what npm consumers import.
 
 ---
 

@@ -54,8 +54,8 @@ export interface Spoje {
 	pk_8: string
 	pk_9: string
 	pk_10: string
-	tripGroupId: number
-	lineResolution: number
+	tripGroupId: string
+	lineResolution: string
 }
 
 export const headers = [

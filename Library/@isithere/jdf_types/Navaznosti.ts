@@ -2,12 +2,12 @@ export interface Navaznosti {
 	type: NavaznostiType
 	lineNumber: string
 	tripNumber: string
-	tarrifNumber: string
+	tariffNumber: string
 	lineNumberContinued?: string
 	stopIdContinued?: string
 	platformIdContinued?: string
-	stopIdTerminatatingContinuation?: string
-	platformIdTerminatatingContinuation?: string
+	stopIdTerminatingContinuation?: string
+	platformIdTerminatingContinuation?: string
 	timeWaited: string
 	note: string
 	lineResolution: string
@@ -22,12 +22,12 @@ export const headers = [
 	"type",
 	"lineNumber",
 	"tripNumber",
-	"tarrifNumber",
+	"tariffNumber",
 	"lineNumberContinued",
 	"stopIdContinued",
 	"platformIdContinued",
-	"stopIdTerminatatingContinuation",
-	"platformIdTerminatatingContinuation",
+	"stopIdTerminatingContinuation",
+	"platformIdTerminatingContinuation",
 	"timeWaited",
 	"note",
 	"lineResolution"

@@ -10,9 +10,10 @@ A generator is an async default export that receives the `JDF2GTFS` instance and
 
 ```ts
 import { JDF2GTFS } from "../../.."
+import { Linky, headers as linkyHeaders } from "../../@isithere/jdf_types/Linky"
 
 export default async function generateRoutes(self: JDF2GTFS): Promise<Map<string, Route>> {
-    const rows = await getContentsArray<Linky>(self.getFile("Linky.txt")!)
+    const rows: Linky[] = await getContentsArray(self.getFile("linky")!, linkyHeaders)
     const result = new Map<string, Route>()
     // ... build entities ...
     return result

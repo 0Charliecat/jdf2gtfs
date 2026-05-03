@@ -31,7 +31,7 @@ export class JDF2GTFS {
 
 	featureFlags: FeatureFlags
 
-	private _loadedFiles: Map<JDFFileName|String, Buffer>
+	private _loadedFiles: Map<JDFFileName, Buffer>
 	private _entities: Map<GTFSEntities, Map<string, any>>
 
 	constructor(config: Configuration) {
@@ -125,15 +125,15 @@ export class JDF2GTFS {
 		switch (this.fileProvider.type) {
 			case "zipbuffer":
 				let loaded = await FileProvider.readZipBuffer(this.fileProvider.contents)
-				this._loadedFiles = new Map(Object.entries(loaded))
+				this._loadedFiles = new Map(Object.entries(loaded) as [JDFFileName, Buffer][])
 				break;
 			case "zipfile":
 				let loaded2 = await FileProvider.readZipPath(this.fileProvider.path)
-				this._loadedFiles = new Map(Object.entries(loaded2))
+				this._loadedFiles = new Map(Object.entries(loaded2) as [JDFFileName, Buffer][])
 				break;
 			case "folder":
 				let loaded3 = await FileProvider.readFolder(this.fileProvider.path)
-				this._loadedFiles = new Map(Object.entries(loaded3))
+				this._loadedFiles = new Map(Object.entries(loaded3) as [JDFFileName, Buffer][])
 				break;
 		}
 

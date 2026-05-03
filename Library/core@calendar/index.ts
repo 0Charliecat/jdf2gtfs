@@ -23,7 +23,7 @@ export default async function runtime(config: JDF2GTFS) {
 
 	for (let _ of _Spoje) {
 		let key = `${id_prefix}${_.lineNumber}r${_.lineResolution}_${_.tripNumber}_C`
-		let _linka = _Linky.find(l => l.number === _.lineNumber && l.lineResolution === _.lineResolution)
+		let _linka = _Linky.find(l => l.number === _.lineNumber && String(l.lineResolution) === _.lineResolution)
 		if (!_linka)
 			throw new Error(`CALENDAR | Can't find a line for trip "${key.replace('_C', '')}"`)
 

@@ -27,7 +27,6 @@ const runner = new JDF2GTFS({
         location: [48.8748300, 18.0489801]
     }],
     timezone: "Europe/Bratislava",
-    lang: "sk",
 })
 
 runner.makeAll().then(output => fs.writeFileSync("./gtfs.zip", output))
