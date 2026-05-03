@@ -132,3 +132,10 @@ dist
 
 .temp
 .DS_Store
+lib/*
+
+testing.*
+RoadMap.md
+docs/
+Library/
+!Library/**/*.d.ts
