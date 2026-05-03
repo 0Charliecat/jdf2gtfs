@@ -10,10 +10,10 @@ export default async function runtime(config: JDF2GTFS) {
 		config.getFile("zastavky")!,
 		headers
 	)
-	const _Oznacniky: Oznacniky[] = await getContentsArray(
-		config.getFile("oznacniky") ?? Buffer.from([]),
+	const _Oznacniky: Oznacniky[] = config.hasFile("oznacniky") ? await getContentsArray(
+		config.getFile("oznacniky"),
 		oznacnikyHeaders
-	)
+	) : []
 
 	let Entities: Map<string, Stop> = new Map()
 
