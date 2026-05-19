@@ -27,7 +27,6 @@ export default async function runtime(config: JDF2GTFS) {
 				_StationNameConstructor(_Zastavky.find(z => z.stopID == _.stopId)!) :
 				_.name
 			let location = locations.get(`${_.stopId}_${_.stand}`) ?? locations.get(`${_.stopId}_${_.markerCode}`) ?? locations.get(`${_.stopId}`) ?? [0,0]
-
 			let computedPlatform = new Stop({
 				id: `${id_prefix}${_.stopId}_${_.markerCode.length != 0 ? _.markerCode : _.stand}`,
 				name: stopName,
@@ -121,6 +120,7 @@ export default async function runtime(config: JDF2GTFS) {
  * @returns {string} i.e. Bratislava, Vajnory, MiÚ Vajnory
  */
 function _StationNameConstructor(stop: Zastavky) {
+	if (!stop) return ""
 	let resultingName = [ stop.localityName, stop.localityPart, stop.nearPlace ]
 	
 	return resultingName

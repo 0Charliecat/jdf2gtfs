@@ -1,53 +1,32 @@
 import JSZip from "jszip";
-import fs from "fs/promises";
 import { JDFFileAllow, JDFFileName } from "./_types/FileProviderTypes";
 import { GTFSEntities } from "../_app/_types/GTFSEntities";
-import { json2csv } from "json-2-csv";
+import Papa from "papaparse";
 
-async function readZipBuffer(buffer: Buffer): Promise<Record<JDFFileName, Buffer>> {
+async function readZipBuffer(buffer: ArrayBuffer): Promise<Record<JDFFileName, Uint8Array>> {
 	const zip = await JSZip.loadAsync(buffer);
-	const files: Partial<Record<JDFFileName, Buffer>> = {};
+	const files: Partial<Record<JDFFileName, Uint8Array>> = {};
 
 	for (const filename of Object.keys(zip.files)) {
 		let jdfFile = filename.toLowerCase().replace(".txt", "") as JDFFileName;
 		if (JDFFileAllow.includes(jdfFile)) {
-			files[jdfFile] = await zip.files[filename].async("nodebuffer");
+			files[jdfFile] = await zip.files[filename].async("uint8array");
 		}
 	}
-	return files as Record<JDFFileName, Buffer>;
+	return files as Record<JDFFileName, Uint8Array>;
 }
 
-async function readZipPath(path: string): Promise<Record<JDFFileName, Buffer>> {
-	return await readZipBuffer(await fs.readFile(path));
-}
-
-async function readFolder(path: string): Promise<Record<JDFFileName, Buffer>> {
-	const files: Partial<Record<JDFFileName, Buffer>> = {};
-	const dir = await fs.readdir(path);
-
-	for (const file of dir) {
-		let jdfFile = file.toLowerCase().replace(".txt", "") as JDFFileName;
-		if (JDFFileAllow.includes(jdfFile)) {
-			files[jdfFile] = await fs.readFile(`${path}/${file}`);
-		}
-	}
-
-	return files as Record<JDFFileName, Buffer>;
-}
-
-async function createZip(entities: Map<GTFSEntities, Map<string, { toJSON(): object }>>): Promise<Buffer> {
+async function createZip(entities: Map<GTFSEntities, Map<string, { toJSON(): object }>>): Promise<ArrayBuffer> {
 	const zip = new JSZip();
 	await Promise.all(
 		Array.from(entities.entries()).map(async ([entity, data]) => {
-			zip.file(`${entity}.txt`, await json2csv([...data.values()].map((v) => v.toJSON())));
+			zip.file(`${entity}.txt`, Papa.unparse([...data.values()].map((v) => v.toJSON())));
 		})
 	);
-	return await zip.generateAsync({ type: "nodebuffer" });
+	return await zip.generateAsync({ type: "arraybuffer" });
 }
 
 export default {
 	readZipBuffer,
-	readZipPath,
-	readFolder,
 	createZip
 };

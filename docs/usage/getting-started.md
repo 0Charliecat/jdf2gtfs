@@ -14,10 +14,13 @@ pnpm add jdf2gtfs
 import { JDF2GTFS } from "jdf2gtfs"
 import fs from "fs/promises"
 
+const file = await fs.readFile("/path/to/your/jdf.zip")
+const arrayBuffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength)
+
 const converter = new JDF2GTFS({
     fileProvider: {
-        type: "zipfile",
-        path: "/path/to/your/jdf.zip"
+        type: "zipbuffer",
+        contents: arrayBuffer
     },
     platforms: [],
     locations: {},
@@ -27,10 +30,10 @@ const converter = new JDF2GTFS({
 })
 
 const gtfsZip = await converter.makeAll()
-await fs.writeFile("./gtfs.zip", gtfsZip)
+await fs.writeFile("./gtfs.zip", Buffer.from(gtfsZip))
 ```
 
-`makeAll()` loads the JDF files, runs every generator in order, and returns a `Buffer` containing the GTFS zip. Write it to disk or pass it to your application directly.
+`makeAll()` loads the JDF files, runs every generator in order, and returns an `ArrayBuffer` containing the GTFS zip.
 
 ## Generating entities individually
 

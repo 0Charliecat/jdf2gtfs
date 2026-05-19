@@ -1,4 +1,3 @@
-import path from "path";
 import { JDF2GTFS } from "../.."
 import { getContentsArray } from "../_app/_reusables/getContentsArray";
 import { VerzeJDF, headers } from "../@isithere/jdf_types/VerzeJDF";

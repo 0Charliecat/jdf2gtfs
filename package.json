@@ -1,7 +1,7 @@
 {
 	"name": "jdf2gtfs",
 	"description": "a nodejs script and dependency to convert Czechoslovak JDF timetable format to GTFS",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"main": "index.js",
 	"types": "index.d.ts",
 	"license": "SEE LICENSE IN LICENSE",
@@ -18,12 +18,10 @@
 		"Library/**/*.d.ts"
 	],
 	"dependencies": {
-		"@fast-csv/parse": "^5.0.2",
-		"@isithere/gtfs": "1.1.0-next-04",
+		"@isithere/gtfs": "1.1.0",
 		"iconv-lite": "^0.6.3",
-		"json-2-csv": "^4.1.1",
 		"jszip": "^3.10.1",
-		"neat-csv": "^7.0.0",
+		"papaparse": "^5.5.3",
 		"slovak-holidays": "^1.0.1"
 	},
 	"scripts": {
@@ -45,6 +43,7 @@
 	"devDependencies": {
 		"@types/adm-zip": "^0.5.7",
 		"@types/node": "^22.10.7",
+		"@types/papaparse": "^5.5.2",
 		"typescript": "^5.7.3"
 	}
 }

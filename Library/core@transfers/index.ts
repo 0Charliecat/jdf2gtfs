@@ -46,7 +46,7 @@ export class Transfer {
 
 // Matches: "pokračuje ako linka 275 do zastávky Závod, Cintorín"
 // Also handles Czech diacritics (pokracuje) and variations without "ako"
-const POKRACUJE_RE = /pokra[čc]uje(?:\s+ako)?\s+linka\s+(\d+)\s+do\s+zast[áa]vky\s+(.+)/i
+const POKRACUJE_RE = /pokra[čc]uje(?:\s+j?ako?)?\s+linka\s+(\d+)\s+do\s+zast[áa]vky\s+(.+)/i
 
 /** Convert a HHMM string (e.g. "2359", "2401") to minutes since midnight. */
 function hhmm2min(hhmm: string): number {

@@ -34,6 +34,12 @@ The calendar dates generator uses `@ts-ignore` in places where JDF's complex cal
 
 ---
 
+## `iconv-lite` type cast in `getContentsArray`
+
+`iconv.decode` is typed to only accept `Buffer`, but at runtime it handles `Uint8Array` correctly. `getContentsArray` works around this with `_file as unknown as Buffer`. If a future version of `iconv-lite` updates its types to accept `Uint8Array`, the cast can be removed.
+
+---
+
 ## Missing automated tests
 
 The only validation is running `testing.nitra.ts` / `testing.ams.ts` manually and checking the output zip. A GTFS validator (e.g. `gtfs-validator` from MobilityData) should be run against the output as part of any release. Adding proper unit tests for the generators is a standing gap.

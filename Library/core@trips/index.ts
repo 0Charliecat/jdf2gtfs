@@ -1,4 +1,3 @@
-import path from "path";
 import { JDF2GTFS } from "../.."
 import { getContentsArray } from "../_app/_reusables/getContentsArray";
 import { Trip, TripBikesAllowed, TripDirection, TripWheelchairAccessibility } from '@isithere/gtfs'
@@ -30,9 +29,9 @@ export default async function runtime(config: JDF2GTFS) {
 	for (let _ of _Spoje) {
 		let key = `${id_prefix}${_.lineNumber}r${_.lineResolution}_${_.tripNumber}`
 
-		let lookingForStopId = _Zasspoje.find(z => z.lineNumber == _.lineNumber && z.tripNumber == _.tripNumber && z.lineResolution == _.lineResolution)?.stopId
+		let lookingForStopId = _Zasspoje.findLast(z => z.lineNumber == _.lineNumber && z.tripNumber == _.tripNumber && z.lineResolution == _.lineResolution)?.stopId
 		let headsign = config.stopNames.get(lookingForStopId ?? "")
-		
+
 		if (!headsign)
 			throw new Error(`TRIP | Can't set headsign for trip "${key}" because stop "${lookingForStopId}" has not been found in Converting Context.`)
 		let _pk = pkArray([_.pk_1, _.pk_2, _.pk_3, _.pk_4, _.pk_5, _.pk_6, _.pk_7, _.pk_8, _.pk_9, _.pk_10])

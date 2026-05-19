@@ -7,7 +7,7 @@ import { PevnyKodEnum, PevnyKodStopAttributes } from "../core@pevnykod/types";
 
 export default async function runtime(config: JDF2GTFS) {
 	const { id_prefix } = config
-	const _Zasspoje: { [tripNumber: string]: Zasspoje[] } = (await getContentsArray(
+	const _Zasspoje: { [tripNumber: string]: Zasspoje[] } = (await getContentsArray<Zasspoje>(
 		config.getFile("zasspoje")!,
 		headers
 	)).reduce((acc, _) => {

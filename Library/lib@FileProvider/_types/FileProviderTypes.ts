@@ -1,16 +1,7 @@
-export type JDFFileProvider = FeedZipBuffer | FeedZipFile | FeedFolder
+export type JDFFileProvider = FeedZipBuffer
 export interface FeedZipBuffer {
 	type: "zipbuffer"
-	contents: Buffer
-}
-export interface FeedZipFile {
-	type: "zipfile"
-	path: string
-}
-
-export interface FeedFolder {
-	type: "folder"
-	path: string
+	contents: ArrayBuffer
 }
 
 export type JDFFileName = "verzejdf" | "zastavky" | "oznacniky" | "dopravci" | "linky" | "linext" | "zaslinky" | "spoje" | "spojskup" | "zasspoje" | "udaje" | "pevnykod" | "caskody" | "navaznosti" | "altdop" | "altlinky" | "mistenky"

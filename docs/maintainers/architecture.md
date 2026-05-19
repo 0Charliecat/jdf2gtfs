@@ -13,14 +13,14 @@ The library is database-less and stateless between runs. A single conversion is 
 ```
 Configuration
   └─ JDF2GTFS constructor    merges defaults, stores all config on instance
-       └─ loadFiles()         reads zip/folder → Map<filename, Buffer>
+       └─ loadFiles()         unpacks ArrayBuffer zip → Map<filename, Uint8Array>
             └─ SetupPevnyKod  parses PevnyKod.txt, stores lookup on instance
                  └─ make*()   each generator reads _loadedFiles,
                  |             writes into _entities
-                 └─ zipEntities()  serialises _entities → GTFS zip Buffer
+                 └─ zipEntities()  serialises _entities → GTFS zip ArrayBuffer
 ```
 
-`makeAll()` runs every step in order and returns the final zip buffer.
+`makeAll()` runs every step in order and returns the final zip as an `ArrayBuffer`.
 
 ---
 
@@ -63,7 +63,7 @@ Every generator receives the full `JDF2GTFS` instance. Generators use:
 
 | Accessor | Purpose |
 |----------|---------|
-| `self.getFile(filename)` | Raw `Buffer` for a JDF CSV file |
+| `self.getFile(filename)` | Raw `Uint8Array` for a JDF CSV file |
 | `self.hasFile(filename)` | Check if a file was present in the input |
 | `self.getStop(id)` | A previously generated `Stop` entity (used by stop_times) |
 | `self.platforms` | Custom platform definitions |

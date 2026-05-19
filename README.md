@@ -10,15 +10,18 @@ A Dependency used by IsItHere to create GTFS feeds from JDF packaged timetables.
 
 ## Usage
 
-```javascript
+```ts
 import { JDF2GTFS } from "jdf2gtfs";
-import fs from "fs"
+import fs from "fs/promises"
+
+const file = await fs.readFile("/path/to/jdf.zip")
+const arrayBuffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength)
 
 const runner = new JDF2GTFS({
-	fileProvider: {
-		type: "zipfile",
-		path: "/Users/0charliecat/Downloads/MHDTN_JDF.zip"
-	},
+    fileProvider: {
+        type: "zipbuffer",
+        contents: arrayBuffer
+    },
     locations: {},
     stop_codes: {},
     platforms: [{
@@ -29,5 +32,8 @@ const runner = new JDF2GTFS({
     timezone: "Europe/Bratislava",
 })
 
-runner.makeAll().then(output => fs.writeFileSync("./gtfs.zip", output))
+const output = await runner.makeAll()
+await fs.writeFile("./gtfs.zip", Buffer.from(output))
 ```
+
+The library is isomorphic — `fileProvider.contents` is a plain `ArrayBuffer`, so the same code works in Node.js, browsers, Deno, and Bun. In a browser, get the `ArrayBuffer` from `fetch(...).then(r => r.arrayBuffer())` or `file.arrayBuffer()` instead.

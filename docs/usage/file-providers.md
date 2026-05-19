@@ -1,46 +1,48 @@
 # File Providers
 
-The `fileProvider` option tells the converter where to read the JDF package from. Three source types are supported.
+The `fileProvider` option tells the converter where to read the JDF package from.
 
 ---
 
-## `zipfile` — read from a path on disk
+## `zipbuffer` — read from an ArrayBuffer
 
 ```ts
 fileProvider: {
-    type: "zipfile",
-    path: "/path/to/jdf.zip"
+    type: "zipbuffer",
+    contents: arrayBuffer   // ArrayBuffer
 }
 ```
 
-The zip is read from disk at the time `loadFiles()` (or `makeAll()`) is called.
+Pass any `ArrayBuffer` containing the zip. This is the only supported source type, which keeps the library isomorphic — it works in Node.js, browsers, Deno, and Bun without modification.
 
----
-
-## `zipbuffer` — read from a Buffer in memory
+### Node.js example
 
 ```ts
 import fs from "fs/promises"
 
 const contents = await fs.readFile("/path/to/jdf.zip")
+// Buffer is a subclass of Uint8Array — extract its underlying ArrayBuffer
+const arrayBuffer = contents.buffer.slice(contents.byteOffset, contents.byteOffset + contents.byteLength)
 
 fileProvider: {
     type: "zipbuffer",
-    contents: contents   // Buffer
+    contents: arrayBuffer
 }
 ```
 
-Useful when you have already loaded the zip into memory, for example after downloading it from a remote source.
-
----
-
-## `folder` — read from an unpacked directory
+### Browser example
 
 ```ts
-fileProvider: {
-    type: "folder",
-    path: "/path/to/unpacked-jdf/"
-}
-```
+// From a fetch response
+const response = await fetch("https://example.com/jdf.zip")
+const arrayBuffer = await response.arrayBuffer()
 
-The directory must contain the JDF CSV files directly (e.g. `Zastavky.txt`, `Linky.txt`, etc.). Use this during development when you want to inspect or modify individual files without re-zipping.
+fileProvider: {
+    type: "zipbuffer",
+    contents: arrayBuffer
+}
+
+// From a file input
+const [file] = input.files
+const arrayBuffer = await file.arrayBuffer()
+```
